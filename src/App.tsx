@@ -1,7 +1,16 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Navigate,
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import type { SessionUser } from "../shared/contracts";
 import { fetchSession, login, logout } from "./lib/api";
-import { getRouteFromLocation, navigateTo, type AppRoute } from "./lib/router";
 import { HistoryView } from "./components/HistoryView";
 import { JobDetailView } from "./components/JobDetailView";
 import { LoginView } from "./components/LoginView";
@@ -9,18 +18,16 @@ import { WorkspaceView } from "./components/WorkspaceView";
 
 function AppLayout({
   user,
-  route,
-  onNavigate,
+  pathname,
   onLogout,
   children,
 }: {
   user: SessionUser;
-  route: AppRoute;
-  onNavigate: (route: AppRoute) => void;
+  pathname: string;
   onLogout: () => Promise<void>;
   children: ReactNode;
 }) {
-  const activeTab = route.name === "history" ? "history" : "workspace";
+  const activeTab = pathname === "/history" ? "history" : "workspace";
 
   return (
     <div className="app-shell">
@@ -39,20 +46,21 @@ function AppLayout({
 
       <div className="shell-body">
         <aside className="sidebar">
-          <button
-            type="button"
-            className={`nav-item ${activeTab === "workspace" ? "active" : ""}`}
-            onClick={() => onNavigate({ name: "workspace" })}
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `nav-item ${(isActive || activeTab === "workspace") ? "active" : ""}`
+            }
           >
             이미지 생성
-          </button>
-          <button
-            type="button"
-            className={`nav-item ${activeTab === "history" ? "active" : ""}`}
-            onClick={() => onNavigate({ name: "history" })}
+          </NavLink>
+          <NavLink
+            to="/history"
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           >
             최근 작업
-          </button>
+          </NavLink>
           <div className="sidebar-note">
             최근 작업은 3일 동안만 표시됩니다.
           </div>
@@ -64,21 +72,64 @@ function AppLayout({
   );
 }
 
+function LoadingScreen() {
+  return (
+    <main className="login-page">
+      <section className="login-card">
+        <h1>불러오는 중입니다</h1>
+      </section>
+    </main>
+  );
+}
+
+function ProtectedLayout({
+  session,
+  sessionLoading,
+  onLogout,
+}: {
+  session: SessionUser | null;
+  sessionLoading: boolean;
+  onLogout: () => Promise<void>;
+}) {
+  const location = useLocation();
+
+  if (sessionLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!session) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  return (
+    <AppLayout
+      user={session}
+      pathname={location.pathname}
+      onLogout={onLogout}
+    >
+      <Outlet />
+    </AppLayout>
+  );
+}
+
+function JobDetailRoute() {
+  const navigate = useNavigate();
+  const params = useParams<{ jobId: string }>();
+
+  if (!params.jobId) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <JobDetailView jobId={params.jobId} onBack={() => navigate("/")} />;
+}
+
 export default function App() {
   const [session, setSession] = useState<SessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [route, setRoute] = useState<AppRoute>(() => getRouteFromLocation());
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setRoute(getRouteFromLocation());
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     let cancelled = false;
@@ -88,11 +139,6 @@ export default function App() {
         const response = await fetchSession();
         if (!cancelled) {
           setSession(response.user);
-          if (!response.user) {
-            navigateTo({ name: "login" });
-          } else if (route.name === "login") {
-            navigateTo({ name: "workspace" });
-          }
         }
       } finally {
         if (!cancelled) {
@@ -108,81 +154,78 @@ export default function App() {
     };
   }, []);
 
-  const screen = useMemo(() => {
-    if (!session) {
-      return null;
-    }
-
-    if (route.name === "history") {
-      return <HistoryView onOpenJob={(jobId) => navigateTo({ name: "job", jobId })} />;
-    }
-
-    if (route.name === "job") {
-      return (
-        <JobDetailView
-          jobId={route.jobId}
-          onBack={() => navigateTo({ name: "workspace" })}
-        />
-      );
-    }
-
-    return (
-      <WorkspaceView
-        onOpenHistory={() => navigateTo({ name: "history" })}
-        onOpenJob={(jobId) => navigateTo({ name: "job", jobId })}
-      />
-    );
-  }, [route, session]);
-
-  if (sessionLoading) {
-    return (
-      <main className="login-page">
-        <section className="login-card">
-          <h1>불러오는 중입니다</h1>
-        </section>
-      </main>
-    );
-  }
-
-  if (!session) {
-    return (
-      <LoginView
-        loading={authLoading}
-        errorMessage={authError}
-        onSubmit={async ({ loginId, password }) => {
-          try {
-            setAuthLoading(true);
-            setAuthError("");
-            const response = await login(loginId, password);
-            setSession(response.user);
-            navigateTo({ name: "workspace" });
-          } catch (error) {
-            setAuthError(
-              error instanceof Error ? error.message : "로그인에 실패했습니다. 다시 시도해 주세요",
-            );
-          } finally {
-            setAuthLoading(false);
-          }
-        }}
-      />
-    );
-  }
-
   return (
-    <AppLayout
-      user={session}
-      route={route}
-      onNavigate={(nextRoute) => {
-        setRoute(nextRoute);
-        navigateTo(nextRoute);
-      }}
-      onLogout={async () => {
-        await logout();
-        setSession(null);
-        navigateTo({ name: "login" });
-      }}
-    >
-      {screen}
-    </AppLayout>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          sessionLoading ? (
+            <LoadingScreen />
+          ) : session ? (
+            <Navigate to="/" replace />
+          ) : (
+            <LoginView
+              loading={authLoading}
+              errorMessage={authError}
+              onSubmit={async ({ loginId, password }) => {
+                try {
+                  setAuthLoading(true);
+                  setAuthError("");
+                  const response = await login(loginId, password);
+                  setSession(response.user);
+                  const nextPath =
+                    typeof location.state === "object" &&
+                    location.state &&
+                    "from" in location.state &&
+                    typeof location.state.from === "string"
+                      ? location.state.from
+                      : "/";
+                  navigate(nextPath, { replace: true });
+                } catch (error) {
+                  setAuthError(
+                    error instanceof Error
+                      ? error.message
+                      : "로그인에 실패했습니다. 다시 시도해 주세요",
+                  );
+                } finally {
+                  setAuthLoading(false);
+                }
+              }}
+            />
+          )
+        }
+      />
+
+      <Route
+        element={
+          <ProtectedLayout
+            session={session}
+            sessionLoading={sessionLoading}
+            onLogout={async () => {
+              await logout();
+              setSession(null);
+              navigate("/login", { replace: true });
+            }}
+          />
+        }
+      >
+        <Route
+          path="/"
+          element={
+            <WorkspaceView
+              onOpenHistory={() => navigate("/history")}
+              onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+            />
+          }
+        />
+        <Route
+          path="/history"
+          element={<HistoryView onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)} />}
+        />
+        <Route path="/jobs/:jobId" element={<JobDetailRoute />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />
+    </Routes>
   );
 }

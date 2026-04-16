@@ -44,43 +44,60 @@ cp .dev.vars.example .dev.vars
 - `SESSION_SECRET`
 - `FASHN_API_KEY`
 
-이 프로젝트는 현재 `.env`를 사용하지 않습니다.  
-서버 비밀값은 `.dev.vars`, D1 로컬 연결값은 `wrangler.local.toml`로 분리합니다.
+이 프로젝트는 현재 `.env`를 사용하지 않습니다.
 
-### 3. 로컬 Wrangler 설정 준비
-
-공개 저장소에는 실제 `database_id`를 커밋하지 않도록 분리했습니다.
-
-```bash
-cp wrangler.local.example.toml wrangler.local.toml
-```
-
-`wrangler.local.toml` 안의 `database_id`를 실제 값으로 바꿔 주세요.
-
-### 4. D1 로컬 스키마 적용
-
-```bash
-pnpm exec wrangler d1 migrations apply modelcut-maker --local
-```
-
-### 5. 프론트 화면 확인
+### 3. 프론트 화면만 빠르게 확인
 
 ```bash
 pnpm dev
 ```
 
 브라우저에서 `http://localhost:5173` 로 확인합니다.  
-이 모드는 화면 작업용입니다.
+이 모드에서는 디자인과 화면 흐름만 확인할 수 있고, `/api/*` 호출은 동작하지 않습니다.
 
-### 6. Cloudflare Functions 포함 전체 확인
+### 4. 로컬 통합 테스트 준비
+
+Cloudflare Pages Functions와 D1까지 같이 확인하려면 D1 바인딩용 `database_id`가 한 번은 필요합니다.  
+이 단계는 Pages를 먼저 배포하라는 뜻이 아니라, D1 데이터베이스를 한 번 생성해서 식별자만 받아오면 된다는 뜻입니다.
+
+```bash
+pnpm exec wrangler d1 create modelcut-maker
+```
+
+위 명령으로 나온 `database_id`를 따로 메모해 두세요.  
+이 값은 공개 저장소에 커밋하지 말고, 로컬 설정 파일과 실행 명령에만 사용하면 됩니다.
+
+### 5. 로컬 D1 설정 파일 준비
+
+`wrangler d1 migrations apply` 는 D1 바인딩 정보가 들어 있는 설정 파일을 읽습니다.  
+그래서 로컬 전용 설정 파일을 하나 따로 둡니다.
+
+```bash
+cp wrangler.local.example.toml wrangler.local.toml
+```
+
+그 다음 `wrangler.local.toml` 안의 `database_id`를 방금 받은 실제 값으로 바꿔 주세요.
+
+### 6. D1 로컬 스키마 적용
+
+```bash
+pnpm migrate:local
+```
+
+### 7. Cloudflare Functions 포함 전체 확인
 
 ```bash
 pnpm build
-pnpm dev:pages:local
+pnpm exec wrangler pages dev dist --d1 DB=여기에_DATABASE_ID
 ```
 
 브라우저에서 Wrangler가 안내하는 주소로 접속합니다.  
 이 모드에서 로그인, 생성 API, D1 조회까지 함께 확인할 수 있습니다.
+
+정리하면 로컬 통합 테스트에서는 두 가지를 함께 씁니다.
+
+- `wrangler.local.toml`: 로컬 D1 마이그레이션용
+- `--d1 DB=...`: `wrangler pages dev` 실행용
 
 ## Cloudflare Pages 배포 방법
 
@@ -90,7 +107,7 @@ pnpm dev:pages:local
 pnpm exec wrangler d1 create modelcut-maker
 ```
 
-생성 후 나온 `database_id` 는 커밋하지 말고 `wrangler.local.toml` 또는 Cloudflare 대시보드 바인딩 설정에만 넣어 주세요.
+생성 후 나온 `database_id` 는 공개 저장소 파일에 넣지 말고 Cloudflare Pages 대시보드 바인딩 설정에만 넣어 주세요.
 
 ### 2. 마이그레이션 적용
 
@@ -115,8 +132,21 @@ pnpm exec wrangler d1 migrations apply modelcut-maker
 
 공개 저장소의 기본 [wrangler.toml](wrangler.toml) 에는 실제 D1 식별자를 넣지 않습니다.
 
-- 로컬 개발: `wrangler.local.toml` 에만 `database_id`를 넣습니다.
-- 배포 환경: Cloudflare Pages 대시보드에서 `DB` 바인딩으로 연결합니다.
+- 로컬 마이그레이션: `wrangler.local.toml` 사용
+- 로컬 통합 테스트: `pnpm exec wrangler pages dev dist --d1 DB=실제_DATABASE_ID`
+- 배포 환경: Cloudflare Pages 대시보드에서 `DB` 바인딩으로 연결
+
+### 6. 브라우저 라우팅 처리
+
+앱 라우팅은 React Router의 브라우저 라우팅을 사용합니다.
+
+- `/login`
+- `/`
+- `/history`
+- `/jobs/:jobId`
+
+Cloudflare Pages에서는 top-level `404.html`을 두지 않으면 SPA fallback이 기본 동작합니다.  
+현재 `_routes.json`은 `/api/*`만 Functions로 보내고 있으므로, 브라우저 라우트 새로고침도 함께 처리됩니다.
 
 ## 로그인 방식
 

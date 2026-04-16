@@ -8,23 +8,39 @@ type SessionPayload = {
 
 const SESSION_COOKIE_NAME = "modelcut_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
-function encodeBase64Url(value: string): string {
-  return btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+function bytesToBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function decodeBase64Url(value: string): string {
+function base64UrlToBytes(value: string): Uint8Array {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/");
   const missingPadding = padded.length % 4;
   const normalized =
     missingPadding === 0 ? padded : `${padded}${"=".repeat(4 - missingPadding)}`;
-  return atob(normalized);
+  const binary = atob(normalized);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function encodeBase64Url(value: string): string {
+  return bytesToBase64Url(textEncoder.encode(value));
+}
+
+function decodeBase64Url(value: string): string {
+  return textDecoder.decode(base64UrlToBytes(value));
 }
 
 async function importSecret(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(secret),
+    textEncoder.encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"],
@@ -35,16 +51,10 @@ async function sign(value: string, secret: string): Promise<string> {
   const signature = await crypto.subtle.sign(
     "HMAC",
     await importSecret(secret),
-    new TextEncoder().encode(value),
+    textEncoder.encode(value),
   );
 
-  const bytes = new Uint8Array(signature);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return encodeBase64Url(binary);
+  return bytesToBase64Url(new Uint8Array(signature));
 }
 
 function parseCookie(request: Request, name: string): string | null {
