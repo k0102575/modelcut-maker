@@ -31,10 +31,17 @@ function AppLayout({
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Model Cut Maker</p>
-          <h1>모델컷 메이커</h1>
+      <header className="topbar topbar-fixed">
+        <div className="topbar-brand">
+          <span className="topbar-title">룩북 메이커</span>
+          <nav className="topbar-nav">
+            <NavLink to="/" end className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
+              워크스페이스
+            </NavLink>
+            <NavLink to="/history" className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
+              히스토리
+            </NavLink>
+          </nav>
         </div>
         <div className="topbar-actions">
           <div className="user-chip">{user.label}</div>
@@ -46,21 +53,32 @@ function AppLayout({
 
       <div className="shell-body">
         <aside className="sidebar">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `nav-item ${(isActive || activeTab === "workspace") ? "active" : ""}`
-            }
-          >
-            이미지 생성
-          </NavLink>
-          <NavLink
-            to="/history"
-            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-          >
-            최근 작업
-          </NavLink>
+          <div className="sidebar-brand">
+            <div className="sidebar-brand-mark">AI</div>
+            <div>
+              <strong>프로젝트 알파</strong>
+              <span>AI 가상 피팅 룸</span>
+            </div>
+          </div>
+          <div className="sidebar-nav">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `nav-item ${(isActive || activeTab === "workspace") ? "active" : ""}`
+              }
+            >
+              이미지 생성
+            </NavLink>
+            <NavLink
+              to="/history"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              최근 작업
+            </NavLink>
+            <div className="nav-item nav-item-muted">일괄 처리</div>
+            <div className="nav-item nav-item-muted">설정</div>
+          </div>
           <div className="sidebar-note">
             최근 작업은 3일 동안만 표시됩니다.
           </div>

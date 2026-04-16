@@ -33,6 +33,9 @@ function validateClientFile(file: File | null, required = false): string | null 
 export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
   const [productImage, setProductImage] = useState<File | null>(null);
   const [modelImage, setModelImage] = useState<File | null>(null);
+  const [category, setCategory] = useState("상의");
+  const [modelPreset, setModelPreset] = useState("성별 자동 (가상모델)");
+  const [cameraAngle, setCameraAngle] = useState("정면");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -77,16 +80,14 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
   }, [currentJob]);
 
   return (
-    <section className="workspace-grid">
-      <div className="panel-stack">
-        <div className="section-title">
-          <div>
-            <p className="eyebrow">Workspace</p>
-            <h2>이미지 생성 워크스페이스</h2>
-          </div>
-          <button type="button" className="secondary-button" onClick={onOpenHistory}>
-            최근 작업 보기
-          </button>
+    <section className="workspace-page">
+      <div className="workspace-shell">
+        <div className="workspace-heading">
+          <p className="eyebrow">Workspace</p>
+          <h2>이미지 생성 워크스페이스</h2>
+          <p className="workspace-copy">
+            상품 사진을 올리고 필요한 설정을 고른 뒤 바로 생성해 보세요.
+          </p>
         </div>
 
         <FileDropField
@@ -95,19 +96,61 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
           required
           file={productImage}
           onChange={setProductImage}
+          size="hero"
         />
 
-        <FileDropField
-          label="사람 사진"
-          hint="원하는 사람이 있으면 함께 올려주세요"
-          file={modelImage}
-          onChange={setModelImage}
-        />
+        <div className="workspace-config-grid">
+          <FileDropField
+            label="사람 사진"
+            hint="원하는 사람이 있으면 함께 올려주세요"
+            file={modelImage}
+            onChange={setModelImage}
+            size="compact"
+          />
+
+          <div className="field-card settings-card">
+            <div className="field-head">
+              <div>
+                <p className="field-label">모델 및 카테고리 설정</p>
+                <p className="field-hint">선택 값은 생성 요청에 함께 반영됩니다</p>
+              </div>
+            </div>
+
+            <div className="settings-stack">
+              <label className="select-group">
+                <span>카테고리</span>
+                <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                  <option value="상의">상의</option>
+                  <option value="하의">하의</option>
+                  <option value="원피스">원피스</option>
+                </select>
+              </label>
+
+              <label className="select-group">
+                <span>모델 선택</span>
+                <select value={modelPreset} onChange={(event) => setModelPreset(event.target.value)}>
+                  <option value="성별 자동 (가상모델)">성별 자동 (가상모델)</option>
+                  <option value="남성 가상모델">남성 가상모델</option>
+                  <option value="여성 가상모델">여성 가상모델</option>
+                </select>
+              </label>
+
+              <label className="select-group">
+                <span>모델 각도</span>
+                <select value={cameraAngle} onChange={(event) => setCameraAngle(event.target.value)}>
+                  <option value="정면">정면</option>
+                  <option value="측면">측면</option>
+                  <option value="뒷면">뒷면</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
 
         <div className="field-card">
           <div className="field-head">
             <div>
-              <p className="field-label">추가 요청</p>
+              <p className="field-label">추가 프롬프트</p>
               <p className="field-hint">배경이나 분위기를 짧게 적어주세요</p>
             </div>
             <span className="pill">선택</span>
@@ -149,7 +192,16 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
               if (modelImage) {
                 formData.append("modelImage", modelImage);
               }
-              formData.append("promptText", promptText.trim());
+              const composedPrompt = [
+                `카테고리: ${category}`,
+                `모델 설정: ${modelPreset}`,
+                `촬영 방향: ${cameraAngle}`,
+                promptText.trim(),
+              ]
+                .filter(Boolean)
+                .join(" / ");
+
+              formData.append("promptText", composedPrompt);
 
               const response = await createJob(formData);
               setCurrentJob(response.job);
@@ -170,14 +222,15 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
         >
           {loading ? "이미지를 요청하는 중입니다" : "이미지 생성하기"}
         </button>
-      </div>
 
-      <div className="panel-stack">
-        <div className="section-title">
+        <div className="workspace-footer-head">
           <div>
             <p className="eyebrow">Result</p>
-            <h2>현재 작업</h2>
+            <h2>현재 작업과 최근 작업</h2>
           </div>
+          <button type="button" className="secondary-button" onClick={onOpenHistory}>
+            최근 작업 보기
+          </button>
         </div>
 
         {currentJob ? (
@@ -242,13 +295,13 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
             </div>
           </article>
         ) : (
-          <div className="empty-card">
+          <div className="empty-card empty-card-soft">
             <strong>아직 생성한 이미지가 없습니다</strong>
             <span>상품 사진을 올리고 바로 생성해 보세요.</span>
           </div>
         )}
 
-        <div className="section-title">
+        <div className="section-title compact">
           <div>
             <p className="eyebrow">Recent</p>
             <h2>최근 작업 요약</h2>
@@ -279,7 +332,7 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
             ))}
           </div>
         ) : (
-          <div className="empty-card">
+          <div className="empty-card empty-card-soft">
             <strong>최근 작업이 없습니다</strong>
             <span>최근 작업은 3일 동안만 표시됩니다.</span>
           </div>

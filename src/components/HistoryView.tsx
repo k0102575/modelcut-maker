@@ -33,16 +33,23 @@ export function HistoryView({ onOpenJob }: Props) {
   }, []);
 
   return (
-    <section className="panel-stack">
-      <div className="section-title">
+    <section className="panel-stack history-page">
+      <div className="history-header">
         <div>
           <p className="eyebrow">History</p>
-          <h2>최근 작업 목록</h2>
-          <p className="section-copy">최근 작업은 3일 동안만 표시됩니다.</p>
+          <h2>결과 확인</h2>
+          <p className="section-copy">
+            생성된 이미지를 확인하고 내려받아 주세요. 최근 작업은 3일 동안만 표시됩니다.
+          </p>
         </div>
-        <button type="button" className="secondary-button" onClick={() => void loadJobs()}>
-          새로고침
-        </button>
+        <div className="history-toolbar">
+          <button type="button" className="secondary-button" onClick={() => void loadJobs()}>
+            새로고침
+          </button>
+          <button type="button" className="ghost-chip" disabled>
+            최신순
+          </button>
+        </div>
       </div>
 
       {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
@@ -57,28 +64,28 @@ export function HistoryView({ onOpenJob }: Props) {
           <span>워크스페이스에서 이미지를 먼저 만들어 주세요.</span>
         </div>
       ) : (
-        <div className="job-list">
+        <div className="history-grid">
           {jobs.map((job) => (
-            <article className="job-card" key={job.id}>
-              <button type="button" className="job-thumb large" onClick={() => onOpenJob(job.id)}>
+            <article className="history-card" key={job.id}>
+              <button type="button" className="history-card-thumb" onClick={() => onOpenJob(job.id)}>
                 {job.outputUrl ? <img src={job.outputUrl} alt="작업 결과" /> : <span>대기</span>}
               </button>
-              <div className="job-meta">
-                <div className="job-topline">
+              <div className="history-card-body">
+                <div className="history-card-head">
                   <StatusBadge status={job.status} />
                   <span>{formatDateTime(job.createdAt)}</span>
                 </div>
-                <strong>{formatModeLabel(job.mode)}</strong>
+                <strong className="history-card-title">{formatModeLabel(job.mode)}</strong>
                 <p>{job.promptText || "추가 요청 없음"}</p>
-                <div className="job-actions">
-                  <button type="button" className="secondary-button" onClick={() => onOpenJob(job.id)}>
-                    상세 보기
-                  </button>
+                <div className="history-card-actions">
                   {job.outputUrl ? (
                     <a className="primary-button" href={job.outputUrl} download>
                       내려받기
                     </a>
                   ) : null}
+                  <button type="button" className="icon-button" onClick={() => onOpenJob(job.id)}>
+                    보기
+                  </button>
                 </div>
               </div>
             </article>

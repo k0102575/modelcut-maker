@@ -7,9 +7,17 @@ type Props = {
   required?: boolean;
   file: File | null;
   onChange: (file: File | null) => void;
+  size?: "hero" | "compact";
 };
 
-export function FileDropField({ label, hint, required, file, onChange }: Props) {
+export function FileDropField({
+  label,
+  hint,
+  required,
+  file,
+  onChange,
+  size = "hero",
+}: Props) {
   const inputId = useId();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -26,7 +34,7 @@ export function FileDropField({ label, hint, required, file, onChange }: Props) 
   }, [file]);
 
   return (
-    <div className="field-card">
+    <div className={`field-card field-card-${size}`}>
       <div className="field-head">
         <div>
           <p className="field-label">{label}</p>
@@ -35,7 +43,7 @@ export function FileDropField({ label, hint, required, file, onChange }: Props) 
         {required ? <span className="pill pill-solid">필수</span> : <span className="pill">선택</span>}
       </div>
 
-      <label className={`upload-box ${file ? "is-filled" : ""}`} htmlFor={inputId}>
+      <label className={`upload-box upload-box-${size} ${file ? "is-filled" : ""}`} htmlFor={inputId}>
         <input
           id={inputId}
           className="sr-only"
@@ -49,7 +57,7 @@ export function FileDropField({ label, hint, required, file, onChange }: Props) 
         ) : (
           <div className="upload-placeholder">
             <span className="upload-icon">＋</span>
-            <strong>사진을 선택해 주세요</strong>
+            <strong>{size === "hero" ? "드래그하거나 파일을 골라 주세요" : "사진을 선택해 주세요"}</strong>
             <span>JPG, PNG, WEBP / 최대 10MB</span>
           </div>
         )}

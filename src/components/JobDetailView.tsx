@@ -82,8 +82,20 @@ export function JobDetailView({ jobId, onBack }: Props) {
   }
 
   return (
-    <section className="detail-grid">
-      <div className="detail-preview">
+    <section className="detail-page">
+      <div className="detail-header">
+        <div>
+          <p className="eyebrow">Detail</p>
+          <h2>결과 상세 확인</h2>
+          <p className="section-copy">생성된 결과를 확인하고 바로 내려받을 수 있습니다.</p>
+        </div>
+        <button type="button" className="secondary-button" onClick={onBack}>
+          이전으로
+        </button>
+      </div>
+
+      <div className="detail-grid">
+        <div className="detail-preview">
         {job.outputUrl ? (
           <img src={job.outputUrl} alt="생성 결과 상세" />
         ) : (
@@ -91,17 +103,6 @@ export function JobDetailView({ jobId, onBack }: Props) {
             {job.status === "failed" ? "생성에 실패했습니다" : "이미지를 만드는 중입니다"}
           </div>
         )}
-      </div>
-
-      <div className="panel-stack">
-        <div className="section-title">
-          <div>
-            <p className="eyebrow">Detail</p>
-            <h2>결과 상세 확인</h2>
-          </div>
-          <button type="button" className="secondary-button" onClick={onBack}>
-            이전으로
-          </button>
         </div>
 
         <div className="detail-card">
@@ -110,7 +111,16 @@ export function JobDetailView({ jobId, onBack }: Props) {
             <span>작업 ID {job.id.slice(0, 8)}</span>
           </div>
 
-          <dl className="summary-list">
+          <div className="detail-summary-block">
+            <h3>적용된 설정</h3>
+            <div className="detail-tags">
+              <span>{formatModeLabel(job.mode)}</span>
+              <span>생성 {formatDateTime(job.createdAt)}</span>
+              <span>만료 {formatDateTime(job.expiresAt)}</span>
+            </div>
+          </div>
+
+          <dl className="summary-list detail-summary-list">
             <div>
               <dt>생성 방식</dt>
               <dd>{formatModeLabel(job.mode)}</dd>
@@ -128,6 +138,11 @@ export function JobDetailView({ jobId, onBack }: Props) {
               <dd>{job.promptText || "없음"}</dd>
             </div>
           </dl>
+
+          <div className="detail-summary-block">
+            <h3>추가 프롬프트</h3>
+            <p className="detail-prompt">{job.promptText || "없음"}</p>
+          </div>
 
           {job.errorMessage ? <p className="error-text">{job.errorMessage}</p> : null}
 

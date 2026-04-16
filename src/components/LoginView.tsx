@@ -12,50 +12,63 @@ export function LoginView({ loading, errorMessage, onSubmit }: Props) {
 
   return (
     <main className="login-page">
-      <section className="login-card">
-        <div className="brand-mark">MC</div>
-        <p className="eyebrow">Internal AI Tool</p>
-        <h1>모델컷 메이커</h1>
-        <p className="login-description">
-          상품 사진으로 모델컷 이미지를 빠르게 만드는 내부용 작업 화면입니다.
-        </p>
+      <section className="login-shell">
+        <div className="login-branding">
+          <div className="brand-mark">AI</div>
+          <p className="eyebrow">Internal AI Tool</p>
+          <h1>로그인</h1>
+        </div>
 
-        <form
-          className="login-form"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            await onSubmit({ loginId, password });
-          }}
-        >
-          <label className="input-group">
-            <span>아이디</span>
-            <input
-              value={loginId}
-              onChange={(event) => setLoginId(event.target.value)}
-              placeholder="아이디를 입력해 주세요"
-              autoComplete="username"
-            />
-          </label>
+        <section className="login-card">
+          <form
+            className="login-form"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              await onSubmit({ loginId, password });
+            }}
+          >
+            <label className="input-group">
+              <span>아이디</span>
+              <div className="input-with-icon">
+                <span className="input-icon">＠</span>
+                <input
+                  value={loginId}
+                  onChange={(event) => setLoginId(event.target.value)}
+                  placeholder="아이디를 입력해 주세요"
+                  autoComplete="username"
+                />
+              </div>
+            </label>
 
-          <label className="input-group">
-            <span>비밀번호</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="비밀번호를 입력해 주세요"
-              autoComplete="current-password"
-            />
-          </label>
+            <label className="input-group">
+              <span>비밀번호</span>
+              <div className="input-with-icon">
+                <span className="input-icon">●</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="비밀번호를 입력해 주세요"
+                  autoComplete="current-password"
+                />
+              </div>
+            </label>
 
-          {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
+            {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
 
-          <button className="primary-button" type="submit" disabled={loading}>
-            {loading ? "로그인 중입니다" : "작업 시작하기"}
-          </button>
-        </form>
+            <button className="primary-button login-submit" type="submit" disabled={loading}>
+              {loading ? "로그인 중입니다" : "작업 시작하기"}
+            </button>
+          </form>
 
-        <p className="login-note">내부 계정만 사용할 수 있습니다.</p>
+          <div className="login-divider" />
+          <p className="login-note">내부 계정만 사용할 수 있습니다.</p>
+        </section>
+
+        <div className="login-status">
+          <span className="status-dot" />
+          <span>System Operational</span>
+        </div>
       </section>
     </main>
   );
