@@ -10,6 +10,14 @@ The UI should help users move through one clear flow:
 
 This system is inspired by CorpScale's enterprise tone, but adapted for a simpler Korean internal tool.
 
+## Source Of Truth
+
+- Screen structure, information flow, and major page composition should reference the `stitch_ai` drafts first.
+- Visual tone, component styling, typography, spacing discipline, and color rules should follow this `DESIGN.md`.
+- This document adopts a `CorpScale`-inspired internal-tool aesthetic and translates it for this project.
+- If `stitch_ai` and this document conflict, prefer the simpler internal workflow and then resolve the visual treatment with `DESIGN.md`.
+- `README.md` should only summarize this rule set; the actual design source of truth is this file.
+
 ## Product Tone
 
 - Professional, quiet, and operational
