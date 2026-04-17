@@ -33,7 +33,10 @@ function AppLayout({
     <div className="app-shell">
       <header className="topbar topbar-fixed">
         <div className="topbar-brand">
-          <span className="topbar-title">룩북 메이커</span>
+          <div className="topbar-brand-copy">
+            <span className="topbar-kicker">Internal Studio</span>
+            <span className="topbar-title">모델컷 메이커</span>
+          </div>
           <nav className="topbar-nav">
             <NavLink to="/" end className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
               워크스페이스
@@ -56,8 +59,8 @@ function AppLayout({
           <div className="sidebar-brand">
             <div className="sidebar-brand-mark">AI</div>
             <div>
-              <strong>프로젝트 알파</strong>
-              <span>AI 가상 피팅 룸</span>
+              <strong>Modelcut Maker</strong>
+              <span>내부용 이미지 생성 도구</span>
             </div>
           </div>
           <div className="sidebar-nav">
@@ -76,11 +79,9 @@ function AppLayout({
             >
               최근 작업
             </NavLink>
-            <div className="nav-item nav-item-muted">일괄 처리</div>
-            <div className="nav-item nav-item-muted">설정</div>
           </div>
           <div className="sidebar-note">
-            최근 작업은 3일 동안만 표시됩니다.
+            결과 이미지는 바로 확인하고 내려받아 주세요. 최근 작업은 3일 동안만 표시됩니다.
           </div>
         </aside>
 

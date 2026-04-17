@@ -13,10 +13,11 @@ export function LoginView({ loading, errorMessage, onSubmit }: Props) {
   return (
     <main className="login-page">
       <section className="login-shell">
-        <div className="login-branding">
+        <div className="login-branding page-header page-header-login">
           <div className="brand-mark">AI</div>
-          <p className="eyebrow">Internal AI Tool</p>
-          <h1>로그인</h1>
+          <p className="eyebrow">Internal Studio</p>
+          <h1>모델컷 메이커</h1>
+          <p className="login-description">내부 계정으로 로그인하고 바로 작업을 시작해 주세요.</p>
         </div>
 
         <section className="login-card">
@@ -67,7 +68,7 @@ export function LoginView({ loading, errorMessage, onSubmit }: Props) {
 
         <div className="login-status">
           <span className="status-dot" />
-          <span>System Operational</span>
+          <span>내부 작업 시스템 연결 준비 완료</span>
         </div>
       </section>
     </main>

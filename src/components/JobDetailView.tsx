@@ -83,10 +83,10 @@ export function JobDetailView({ jobId, onBack }: Props) {
 
   return (
     <section className="detail-page">
-      <div className="detail-header">
+      <div className="detail-header page-header">
         <div>
           <p className="eyebrow">Detail</p>
-          <h2>결과 상세 확인</h2>
+          <h2>작업 상세 기록</h2>
           <p className="section-copy">생성된 결과를 확인하고 바로 내려받을 수 있습니다.</p>
         </div>
         <button type="button" className="secondary-button" onClick={onBack}>

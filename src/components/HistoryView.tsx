@@ -34,10 +34,10 @@ export function HistoryView({ onOpenJob }: Props) {
 
   return (
     <section className="panel-stack history-page">
-      <div className="history-header">
+      <div className="history-header page-header">
         <div>
           <p className="eyebrow">History</p>
-          <h2>결과 확인</h2>
+          <h2>최근 작업 기록</h2>
           <p className="section-copy">
             생성된 이미지를 확인하고 내려받아 주세요. 최근 작업은 3일 동안만 표시됩니다.
           </p>

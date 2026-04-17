@@ -1,33 +1,36 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap");
 
 :root {
   font-family: "Pretendard Variable", "Noto Sans KR", sans-serif;
-  color: #253037;
+  color: #142235;
   background:
-    radial-gradient(circle at top right, rgba(208, 224, 244, 0.7), transparent 32%),
-    radial-gradient(circle at bottom left, rgba(223, 231, 242, 0.75), transparent 28%),
-    #f5f7fb;
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(243, 246, 250, 0.98)),
+    #f8fafc;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
-  --surface: rgba(255, 255, 255, 0.9);
+  --surface: rgba(255, 255, 255, 0.94);
   --surface-strong: #ffffff;
-  --surface-soft: #eef3f7;
-  --surface-border: rgba(112, 125, 135, 0.18);
-  --text-main: #253037;
-  --text-subtle: #5f6d76;
-  --primary: #55647b;
-  --primary-dark: #46546a;
-  --primary-soft: #dbe7fa;
-  --danger: #b64f4c;
-  --danger-soft: #f8e4e1;
-  --success-soft: #dfeee3;
-  --success-text: #33634a;
-  --shadow-lg: 0 24px 54px rgba(47, 65, 84, 0.1);
-  --shadow-md: 0 12px 32px rgba(41, 58, 76, 0.08);
-  --radius-xl: 28px;
-  --radius-lg: 20px;
-  --radius-md: 14px;
+  --surface-soft: #eef2f6;
+  --surface-border: #d7dfe8;
+  --text-main: #142235;
+  --text-subtle: #6b7280;
+  --primary: #1e3a5f;
+  --primary-dark: #172f4e;
+  --primary-soft: #dce7f5;
+  --accent: #2563eb;
+  --danger: #dc2626;
+  --danger-soft: #fce8e8;
+  --success-soft: #e5f4e8;
+  --success-text: #166534;
+  --warning-soft: #fbf2d8;
+  --warning-text: #9a6700;
+  --shadow-lg: 0 18px 36px rgba(20, 34, 53, 0.08);
+  --shadow-md: 0 8px 18px rgba(20, 34, 53, 0.05);
+  --radius-xl: 8px;
+  --radius-lg: 8px;
+  --radius-md: 6px;
 }
 
 * {
@@ -43,6 +46,9 @@ body,
 
 body {
   color: var(--text-main);
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(244, 247, 250, 0.98)),
+    #f8fafc;
 }
 
 button,
@@ -91,9 +97,8 @@ a {
   place-items: center;
   padding: 2rem;
   background:
-    radial-gradient(circle at top right, rgba(215, 227, 251, 0.95), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(225, 234, 243, 0.8), transparent 26%),
-    #f7f9fb;
+    linear-gradient(180deg, rgba(246, 249, 252, 0.98), rgba(241, 245, 249, 0.96)),
+    #f8fafc;
 }
 
 .login-shell {
@@ -113,20 +118,21 @@ a {
   height: 4rem;
   display: grid;
   place-items: center;
-  border-radius: 1.25rem;
-  background: linear-gradient(160deg, #dbe6fa, #edf2f8);
-  color: var(--primary-dark);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #28486f, #1e3a5f);
+  color: #f8fafc;
   font-weight: 800;
   margin: 0 auto 1.25rem;
+  box-shadow: var(--shadow-md);
 }
 
 .login-card {
   width: 100%;
   padding: 2.25rem;
-  border-radius: 1.8rem;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(112, 125, 135, 0.12);
-  box-shadow: 0 22px 46px rgba(42, 52, 57, 0.08);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .login-divider {
@@ -140,10 +146,11 @@ a {
   gap: 0.6rem;
   padding: 0.55rem 0.9rem;
   border-radius: 999px;
-  background: rgba(240, 244, 247, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--text-subtle);
   font-size: 0.78rem;
   font-weight: 700;
+  border: 1px solid var(--surface-border);
 }
 
 .status-dot {
@@ -157,8 +164,20 @@ a {
 .topbar h1,
 .section-title h2 {
   margin: 0;
-  font-size: clamp(1.6rem, 2vw, 2rem);
+  font-size: clamp(1.6rem, 2vw, 2.05rem);
   line-height: 1.15;
+}
+
+.login-card h1,
+.login-branding h1,
+.workspace-heading h2,
+.history-header h2,
+.detail-header h2,
+.section-title h2,
+.sidebar-brand strong,
+.topbar-title {
+  font-family: "Noto Serif KR", Georgia, serif;
+  letter-spacing: -0.02em;
 }
 
 .login-description,
@@ -202,10 +221,10 @@ a {
 .prompt-textarea {
   width: 100%;
   border: 1px solid var(--surface-border);
-  border-radius: 1rem;
+  border-radius: var(--radius-md);
   background: var(--surface-strong);
   color: var(--text-main);
-  padding: 0.95rem 1rem;
+  padding: 0.88rem 0.95rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -230,8 +249,8 @@ a {
 .input-group input:focus,
 .prompt-textarea:focus {
   outline: none;
-  border-color: rgba(85, 100, 123, 0.45);
-  box-shadow: 0 0 0 4px rgba(85, 100, 123, 0.12);
+  border-color: rgba(37, 99, 235, 0.52);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .prompt-textarea {
@@ -244,7 +263,7 @@ a {
 .text-button,
 .nav-item {
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
 }
 
@@ -259,9 +278,9 @@ a {
 }
 
 .primary-button {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  background: var(--primary);
   color: #f8fbff;
-  box-shadow: 0 14px 32px rgba(72, 90, 114, 0.18);
+  box-shadow: 0 8px 18px rgba(30, 58, 95, 0.16);
 }
 
 .primary-button.large {
@@ -274,15 +293,15 @@ a {
 }
 
 .secondary-button {
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text-main);
-  border: 1px solid rgba(112, 125, 135, 0.2);
+  border: 1px solid var(--surface-border);
 }
 
 .text-button {
   padding: 0;
   background: transparent;
-  color: var(--primary);
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -300,11 +319,12 @@ a {
 
 .error-text {
   margin: 0;
-  padding: 0.85rem 1rem;
-  border-radius: 1rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: var(--radius-md);
   background: var(--danger-soft);
   color: var(--danger);
   font-weight: 600;
+  border: 1px solid rgba(220, 38, 38, 0.14);
 }
 
 .app-shell {
@@ -327,9 +347,9 @@ a {
   height: 4rem;
   padding: 0.9rem 1.5rem;
   align-items: center;
-  background: rgba(247, 250, 252, 0.84);
+  background: rgba(248, 250, 252, 0.94);
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(112, 125, 135, 0.12);
+  border-bottom: 1px solid var(--surface-border);
 }
 
 .topbar-brand {
@@ -338,9 +358,23 @@ a {
   gap: 2rem;
 }
 
+.topbar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.topbar-kicker {
+  color: var(--text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .topbar-title {
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -359,7 +393,7 @@ a {
 
 .topbar-link.active {
   color: var(--text-main);
-  border-color: rgba(85, 100, 123, 0.8);
+  border-color: rgba(30, 58, 95, 0.85);
 }
 
 .topbar-actions {
@@ -385,15 +419,15 @@ a {
 
 .user-chip,
 .pill {
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text-subtle);
-  border: 1px solid rgba(112, 125, 135, 0.18);
+  border: 1px solid var(--surface-border);
 }
 
 .pill-solid {
   background: var(--primary-soft);
   color: var(--primary-dark);
-  border-color: transparent;
+  border-color: var(--primary-soft);
 }
 
 .shell-body {
@@ -409,7 +443,7 @@ a {
   padding: 1.25rem;
   border-radius: var(--radius-xl);
   background: var(--surface);
-  border: 1px solid rgba(112, 125, 135, 0.15);
+  border: 1px solid var(--surface-border);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(16px);
 }
@@ -426,6 +460,7 @@ a {
   align-items: center;
   gap: 0.85rem;
   padding: 0.4rem 0.2rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
 }
 
 .sidebar-brand-mark {
@@ -433,9 +468,9 @@ a {
   height: 2.25rem;
   display: grid;
   place-items: center;
-  border-radius: 0.8rem;
-  background: linear-gradient(160deg, #d8e3fb, #ecf1fa);
-  color: var(--primary-dark);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #28486f, #1e3a5f);
+  color: #f8fafc;
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -458,14 +493,14 @@ a {
 
 .nav-item {
   justify-content: flex-start;
-  padding: 0.95rem 1rem;
+  padding: 0.8rem 0.9rem;
   font-weight: 700;
   color: var(--text-main);
   background: transparent;
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(85, 100, 123, 0.98), rgba(70, 84, 106, 0.96));
+  background: linear-gradient(180deg, rgba(30, 58, 95, 0.98), rgba(23, 47, 78, 0.98));
   color: #f8fbff;
 }
 
@@ -477,10 +512,11 @@ a {
 .sidebar-note {
   margin-top: auto;
   padding: 1rem;
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
   background: var(--surface-soft);
   color: var(--text-subtle);
   font-size: 0.92rem;
+  border: 1px solid var(--surface-border);
 }
 
 .content-panel {
@@ -524,14 +560,24 @@ a {
   flex-wrap: wrap;
 }
 
+.page-header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.page-header-login {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
 .workspace-heading {
-  text-align: center;
-  padding: 1rem 0 0.25rem;
+  text-align: left;
+  padding: 0.4rem 0 0.15rem;
 }
 
 .workspace-copy {
-  margin: 0.5rem auto 0;
-  max-width: 38rem;
+  margin: 0.4rem 0 0;
+  max-width: 42rem;
   color: var(--text-subtle);
 }
 
@@ -549,6 +595,10 @@ a {
   margin-top: 0.75rem;
 }
 
+.section-header-row {
+  padding-top: 0.25rem;
+}
+
 .field-card,
 .result-card,
 .job-card,
@@ -557,8 +607,8 @@ a {
 .detail-card {
   border-radius: var(--radius-lg);
   background: var(--surface-strong);
-  border: 1px solid rgba(112, 125, 135, 0.14);
-  box-shadow: 0 10px 28px rgba(41, 58, 76, 0.06);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-md);
 }
 
 .field-card,
@@ -589,11 +639,10 @@ a {
   position: relative;
   display: block;
   min-height: 16rem;
-  border: 1.5px dashed rgba(112, 125, 135, 0.32);
-  border-radius: 1.35rem;
+  border: 1px dashed rgba(107, 114, 128, 0.46);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background:
-    linear-gradient(145deg, rgba(244, 247, 251, 0.9), rgba(236, 241, 247, 0.86));
+  background: linear-gradient(180deg, rgba(246, 248, 251, 0.94), rgba(239, 243, 247, 0.92));
 }
 
 .upload-box-hero {
@@ -645,9 +694,9 @@ a {
   width: 100%;
   min-height: 2.9rem;
   padding: 0.75rem 0.95rem;
-  border-radius: 0.95rem;
-  border: 1px solid rgba(112, 125, 135, 0.16);
-  background: #eef4f8;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: #f8fafc;
   color: var(--text-main);
   font: inherit;
 }
@@ -659,8 +708,9 @@ a {
   height: 3.5rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
-  color: var(--primary);
+  color: var(--primary-dark);
   font-size: 1.6rem;
+  border: 1px solid var(--surface-border);
 }
 
 .upload-preview,
@@ -708,8 +758,8 @@ a {
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--surface-strong);
-  border: 1px solid rgba(112, 125, 135, 0.14);
-  box-shadow: 0 10px 28px rgba(41, 58, 76, 0.06);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-md);
 }
 
 .history-card-thumb {
@@ -740,10 +790,10 @@ a {
 
 .icon-button,
 .ghost-chip {
-  border: 1px solid rgba(112, 125, 135, 0.18);
-  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--surface-border);
+  background: rgba(255, 255, 255, 0.94);
   color: var(--text-subtle);
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   min-height: 2.5rem;
   padding: 0.6rem 0.95rem;
   font: inherit;
@@ -814,7 +864,7 @@ a {
 .job-thumb {
   overflow: hidden;
   border: 0;
-  border-radius: 1rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
   min-height: 9.5rem;
   display: grid;
@@ -836,8 +886,8 @@ a {
 
 .status-pending,
 .status-processing {
-  background: #ecf2fb;
-  color: #46617c;
+  background: var(--warning-soft);
+  color: var(--warning-text);
 }
 
 .status-completed {
@@ -887,10 +937,11 @@ a {
 
 .detail-tags span {
   padding: 0.55rem 0.8rem;
-  border-radius: 0.85rem;
-  background: #eef4f8;
+  border-radius: var(--radius-md);
+  background: #f2f5f9;
   color: var(--text-main);
   font-size: 0.9rem;
+  border: 1px solid var(--surface-border);
 }
 
 .detail-summary-list {
@@ -900,9 +951,9 @@ a {
 .detail-prompt {
   margin: 0;
   padding: 0.95rem 1rem;
-  border-radius: 1rem;
-  background: rgba(238, 244, 248, 0.72);
-  border: 1px solid rgba(169, 180, 185, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(242, 245, 249, 0.9);
+  border: 1px solid var(--surface-border);
   color: var(--text-main);
 }
 

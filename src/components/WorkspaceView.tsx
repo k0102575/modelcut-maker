@@ -82,9 +82,9 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
   return (
     <section className="workspace-page">
       <div className="workspace-shell">
-        <div className="workspace-heading">
+        <div className="workspace-heading page-header">
           <p className="eyebrow">Workspace</p>
-          <h2>이미지 생성 워크스페이스</h2>
+          <h2>모델컷 생성실</h2>
           <p className="workspace-copy">
             상품 사진을 올리고 필요한 설정을 고른 뒤 바로 생성해 보세요.
           </p>
@@ -110,11 +110,11 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
 
           <div className="field-card settings-card">
             <div className="field-head">
-              <div>
-                <p className="field-label">모델 및 카테고리 설정</p>
-                <p className="field-hint">선택 값은 생성 요청에 함께 반영됩니다</p>
-              </div>
+            <div>
+              <p className="field-label">모델 및 카테고리 설정</p>
+              <p className="field-hint">선택한 값은 생성 요청 문구에 함께 반영됩니다</p>
             </div>
+          </div>
 
             <div className="settings-stack">
               <label className="select-group">
@@ -223,10 +223,10 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
           {loading ? "이미지를 요청하는 중입니다" : "이미지 생성하기"}
         </button>
 
-        <div className="workspace-footer-head">
+        <div className="workspace-footer-head section-header-row">
           <div>
             <p className="eyebrow">Result</p>
-            <h2>현재 작업과 최근 작업</h2>
+            <h2>현재 작업과 최근 기록</h2>
           </div>
           <button type="button" className="secondary-button" onClick={onOpenHistory}>
             최근 작업 보기
