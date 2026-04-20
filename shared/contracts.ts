@@ -6,6 +6,8 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
 ] as const;
 export const ACCEPT_IMAGE_FILES = ".jpg,.jpeg,.png,.webp";
 
+export const FASHN_GENERATION_MODES = ["fast", "balanced", "quality"] as const;
+
 export type JobStatus =
   | "pending"
   | "processing"
@@ -14,6 +16,19 @@ export type JobStatus =
   | "expired";
 
 export type JobMode = "person" | "virtual";
+export type GenerationMode = (typeof FASHN_GENERATION_MODES)[number];
+
+export function getProductToModelCreditCost(mode: GenerationMode): number {
+  if (mode === "fast") {
+    return 1;
+  }
+
+  if (mode === "quality") {
+    return 3;
+  }
+
+  return 2;
+}
 
 export type SessionUser = {
   id: string;
@@ -43,8 +58,18 @@ export type SessionResponse = {
   user: SessionUser | null;
 };
 
+export type CreditsSummary = {
+  total: number;
+  subscription: number;
+  onDemand: number;
+};
+
 export type LoginResponse = {
   user: SessionUser;
+};
+
+export type CreditsResponse = {
+  credits: CreditsSummary;
 };
 
 export type JobsResponse = {

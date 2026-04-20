@@ -1,4 +1,4 @@
-import type { JobResponse } from "../../shared/contracts";
+import { FASHN_GENERATION_MODES, type GenerationMode, type JobResponse } from "../../shared/contracts";
 import { requireAuth } from "../_shared/auth";
 import { createPrediction, fileToDataUrl, validateImageFile } from "../_shared/fashn";
 import { insertJob, type Env } from "../_shared/jobs";
@@ -31,11 +31,18 @@ export const onRequestPost = async (context: {
     );
     const modelImageFile = validateImageFile(formData.get("modelImage"), "사람 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
+    const generationModeValue = String(formData.get("generationMode") ?? "balanced");
+    const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
+      generationModeValue as GenerationMode,
+    )
+      ? (generationModeValue as GenerationMode)
+      : "balanced";
 
     const predictionId = await createPrediction(env.FASHN_API_KEY, {
       productImage: await fileToDataUrl(productImageFile as File),
       modelImage: modelImageFile ? await fileToDataUrl(modelImageFile) : undefined,
       prompt: promptText,
+      generationMode,
     });
 
     const job = await insertJob(env, {

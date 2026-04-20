@@ -1,4 +1,5 @@
 import type {
+  CreditsResponse,
   JobResponse,
   JobsResponse,
   LoginResponse,
@@ -56,6 +57,13 @@ export async function createJob(formData: FormData): Promise<JobResponse> {
   return request<JobResponse>("/api/generate", {
     method: "POST",
     body: formData,
+    headers: {},
+  });
+}
+
+export async function fetchCredits(): Promise<CreditsResponse> {
+  return request<CreditsResponse>("/api/credits", {
+    method: "GET",
     headers: {},
   });
 }

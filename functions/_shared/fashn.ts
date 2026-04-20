@@ -2,6 +2,8 @@ import {
   ALLOWED_IMAGE_MIME_TYPES,
   MAX_IMAGE_FILE_SIZE_BYTES,
   type JobStatus,
+  type CreditsSummary,
+  type GenerationMode,
 } from "../../shared/contracts";
 
 const FASHN_BASE_URL = "https://api.fashn.ai/v1";
@@ -20,6 +22,16 @@ type FashnStatusResponse = {
     message?: string;
     name?: string;
   } | null;
+};
+
+type FashnCreditsPayload = {
+  credits?: {
+    total?: number;
+    subscription?: number;
+    on_demand?: number;
+  };
+  error?: string | { message?: string };
+  message?: string;
 };
 
 function readApiErrorMessage(payload: unknown): string | null {
@@ -96,6 +108,7 @@ export async function createPrediction(
     productImage: string;
     modelImage?: string;
     prompt: string;
+    generationMode: GenerationMode;
   },
 ): Promise<string> {
   const payload = {
@@ -104,8 +117,9 @@ export async function createPrediction(
       product_image: input.productImage,
       ...(input.modelImage ? { model_image: input.modelImage } : {}),
       ...(input.prompt ? { prompt: input.prompt } : {}),
+      resolution: "1k",
       aspect_ratio: "3:4",
-      generation_mode: "balanced",
+      generation_mode: input.generationMode,
       output_format: "png",
       return_base64: false,
     },
@@ -175,5 +189,24 @@ export async function getPredictionStatus(
     status: "processing",
     outputUrl: null,
     errorMessage: null,
+  };
+}
+
+export async function getCreditsBalance(apiKey: string): Promise<CreditsSummary> {
+  const response = await fetch(`${FASHN_BASE_URL}/credits`, {
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  const data = (await response.json()) as FashnCreditsPayload;
+  if (!response.ok || !data.credits) {
+    throw new Error(readApiErrorMessage(data) ?? "크레딧 정보를 불러오지 못했습니다");
+  }
+
+  return {
+    total: Number(data.credits.total ?? 0),
+    subscription: Number(data.credits.subscription ?? 0),
+    onDemand: Number(data.credits.on_demand ?? 0),
   };
 }

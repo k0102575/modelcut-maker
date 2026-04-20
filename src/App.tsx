@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Navigate,
   NavLink,
@@ -10,7 +10,7 @@ import {
   useParams,
 } from "react-router-dom";
 import type { SessionUser } from "../shared/contracts";
-import { fetchSession, login, logout } from "./lib/api";
+import { fetchCredits, fetchSession, login, logout } from "./lib/api";
 import { HistoryView } from "./components/HistoryView";
 import { JobDetailView } from "./components/JobDetailView";
 import { LoginView } from "./components/LoginView";
@@ -18,11 +18,13 @@ import { WorkspaceView } from "./components/WorkspaceView";
 
 function AppLayout({
   user,
+  credits,
   pathname,
   onLogout,
   children,
 }: {
   user: SessionUser;
+  credits: number | null;
   pathname: string;
   onLogout: () => Promise<void>;
   children: ReactNode;
@@ -42,11 +44,12 @@ function AppLayout({
               워크스페이스
             </NavLink>
             <NavLink to="/history" className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
-              히스토리
+              최근 작업
             </NavLink>
           </nav>
         </div>
         <div className="topbar-actions">
+          {credits !== null ? <div className="user-chip">크레딧 {credits}</div> : null}
           <div className="user-chip">{user.label}</div>
           <button type="button" className="secondary-button" onClick={() => void onLogout()}>
             로그아웃
@@ -104,10 +107,12 @@ function LoadingScreen() {
 function ProtectedLayout({
   session,
   sessionLoading,
+  credits,
   onLogout,
 }: {
   session: SessionUser | null;
   sessionLoading: boolean;
+  credits: number | null;
   onLogout: () => Promise<void>;
 }) {
   const location = useLocation();
@@ -123,6 +128,7 @@ function ProtectedLayout({
   return (
     <AppLayout
       user={session}
+      credits={credits}
       pathname={location.pathname}
       onLogout={onLogout}
     >
@@ -131,22 +137,13 @@ function ProtectedLayout({
   );
 }
 
-function JobDetailRoute() {
-  const navigate = useNavigate();
-  const params = useParams<{ jobId: string }>();
-
-  if (!params.jobId) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <JobDetailView jobId={params.jobId} onBack={() => navigate("/")} />;
-}
-
 export default function App() {
   const [session, setSession] = useState<SessionUser | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
+  const reservedCreditsByJobIdRef = useRef<Record<string, number>>({});
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -172,6 +169,80 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setCredits(null);
+      reservedCreditsByJobIdRef.current = {};
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    async function loadCredits() {
+      try {
+        const response = await fetchCredits();
+        if (!cancelled) {
+          setCredits(response.credits.total);
+        }
+      } catch {
+        if (!cancelled) {
+          setCredits(null);
+        }
+      }
+    }
+
+    void loadCredits();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
+  function reserveCredits(jobId: string, cost: number) {
+    if (reservedCreditsByJobIdRef.current[jobId]) {
+      return;
+    }
+
+    reservedCreditsByJobIdRef.current = {
+      ...reservedCreditsByJobIdRef.current,
+      [jobId]: cost,
+    };
+
+    setCredits((current) => (current === null ? current : Math.max(current - cost, 0)));
+  }
+
+  function settleReservedCredits(jobId: string, status: "completed" | "failed" | "expired") {
+    const cost = reservedCreditsByJobIdRef.current[jobId];
+    if (!cost) {
+      return;
+    }
+
+    const nextReservedCredits = { ...reservedCreditsByJobIdRef.current };
+    delete nextReservedCredits[jobId];
+    reservedCreditsByJobIdRef.current = nextReservedCredits;
+
+    if (status === "failed" || status === "expired") {
+      setCredits((current) => (current === null ? current : current + cost));
+    }
+  }
+
+  function JobDetailRouteWithCredits() {
+    const navigateTo = useNavigate();
+    const params = useParams<{ jobId: string }>();
+
+    if (!params.jobId) {
+      return <Navigate to="/" replace />;
+    }
+
+    return (
+      <JobDetailView
+        jobId={params.jobId}
+        onBack={() => navigateTo("/")}
+        onJobSettled={settleReservedCredits}
+      />
+    );
+  }
 
   return (
     <Routes>
@@ -220,8 +291,11 @@ export default function App() {
           <ProtectedLayout
             session={session}
             sessionLoading={sessionLoading}
+            credits={credits}
             onLogout={async () => {
               await logout();
+              reservedCreditsByJobIdRef.current = {};
+              setCredits(null);
               setSession(null);
               navigate("/login", { replace: true });
             }}
@@ -234,6 +308,8 @@ export default function App() {
             <WorkspaceView
               onOpenHistory={() => navigate("/history")}
               onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+              onCreditsReserved={reserveCredits}
+              onJobSettled={settleReservedCredits}
             />
           }
         />
@@ -241,7 +317,7 @@ export default function App() {
           path="/history"
           element={<HistoryView onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)} />}
         />
-        <Route path="/jobs/:jobId" element={<JobDetailRoute />} />
+        <Route path="/jobs/:jobId" element={<JobDetailRouteWithCredits />} />
       </Route>
 
       <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />

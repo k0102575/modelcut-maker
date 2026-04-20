@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ALLOWED_IMAGE_MIME_TYPES,
+  getProductToModelCreditCost,
   MAX_IMAGE_FILE_SIZE_BYTES,
+  type GenerationMode,
   type JobSummary,
 } from "../../shared/contracts";
-import { createJob, fetchJobs, pollJob } from "../lib/api";
+import { createJob, pollJob } from "../lib/api";
 import { formatDateTime, formatModeLabel } from "../lib/format";
 import { FileDropField } from "./FileDropField";
 import { StatusBadge } from "./StatusBadge";
@@ -12,6 +14,8 @@ import { StatusBadge } from "./StatusBadge";
 type Props = {
   onOpenHistory: () => void;
   onOpenJob: (jobId: string) => void;
+  onCreditsReserved: (jobId: string, cost: number) => void;
+  onJobSettled: (jobId: string, status: "completed" | "failed" | "expired") => void;
 };
 
 function validateClientFile(file: File | null, required = false): string | null {
@@ -30,34 +34,24 @@ function validateClientFile(file: File | null, required = false): string | null 
   return null;
 }
 
-export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
+export function WorkspaceView({
+  onOpenHistory,
+  onOpenJob,
+  onCreditsReserved,
+  onJobSettled,
+}: Props) {
   const [productImage, setProductImage] = useState<File | null>(null);
   const [modelImage, setModelImage] = useState<File | null>(null);
   const [category, setCategory] = useState("상의");
-  const [modelPreset, setModelPreset] = useState("성별 자동 (가상모델)");
+  const [modelPreset, setModelPreset] = useState("여성 가상모델");
   const [cameraAngle, setCameraAngle] = useState("정면");
+  const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentJob, setCurrentJob] = useState<JobSummary | null>(null);
-  const [recentJobs, setRecentJobs] = useState<JobSummary[]>([]);
 
   const canSubmit = useMemo(() => !loading, [loading]);
-
-  async function refreshRecentJobs() {
-    try {
-      const response = await fetchJobs();
-      setRecentJobs(response.jobs);
-    } catch (error) {
-      if (error instanceof Error && error.message === "로그인이 필요합니다") {
-        setErrorMessage("세션이 끝났습니다. 다시 로그인해 주세요");
-      }
-    }
-  }
-
-  useEffect(() => {
-    void refreshRecentJobs();
-  }, []);
 
   useEffect(() => {
     if (!currentJob || (currentJob.status !== "pending" && currentJob.status !== "processing")) {
@@ -68,7 +62,13 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
       try {
         const response = await pollJob(currentJob.id);
         setCurrentJob(response.job);
-        await refreshRecentJobs();
+        if (
+          response.job.status === "completed" ||
+          response.job.status === "failed" ||
+          response.job.status === "expired"
+        ) {
+          onJobSettled(response.job.id, response.job.status);
+        }
       } catch (error) {
         if (error instanceof Error) {
           setErrorMessage(error.message);
@@ -77,7 +77,7 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
     }, 4000);
 
     return () => window.clearInterval(timer);
-  }, [currentJob]);
+  }, [currentJob, onJobSettled]);
 
   return (
     <section className="workspace-page">
@@ -143,6 +143,18 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
                   <option value="뒷면">뒷면</option>
                 </select>
               </label>
+
+              <label className="select-group">
+                <span>생성 품질</span>
+                <select
+                  value={generationMode}
+                  onChange={(event) => setGenerationMode(event.target.value as GenerationMode)}
+                >
+                  <option value="fast">빠르게 (1 크레딧)</option>
+                  <option value="balanced">균형 (2 크레딧)</option>
+                  <option value="quality">고품질 (3 크레딧)</option>
+                </select>
+              </label>
             </div>
           </div>
         </div>
@@ -192,6 +204,7 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
               if (modelImage) {
                 formData.append("modelImage", modelImage);
               }
+              formData.append("generationMode", generationMode);
               const composedPrompt = [
                 `카테고리: ${category}`,
                 `모델 설정: ${modelPreset}`,
@@ -204,11 +217,11 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
               formData.append("promptText", composedPrompt);
 
               const response = await createJob(formData);
+              onCreditsReserved(response.job.id, getProductToModelCreditCost(generationMode));
               setCurrentJob(response.job);
               setProductImage(null);
               setModelImage(null);
               setPromptText("");
-              await refreshRecentJobs();
             } catch (error) {
               setErrorMessage(
                 error instanceof Error
@@ -226,7 +239,7 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
         <div className="workspace-footer-head section-header-row">
           <div>
             <p className="eyebrow">Result</p>
-            <h2>현재 작업과 최근 기록</h2>
+            <h2>현재 작업</h2>
           </div>
           <button type="button" className="secondary-button" onClick={onOpenHistory}>
             최근 작업 보기
@@ -298,43 +311,6 @@ export function WorkspaceView({ onOpenHistory, onOpenJob }: Props) {
           <div className="empty-card empty-card-soft">
             <strong>아직 생성한 이미지가 없습니다</strong>
             <span>상품 사진을 올리고 바로 생성해 보세요.</span>
-          </div>
-        )}
-
-        <div className="section-title compact">
-          <div>
-            <p className="eyebrow">Recent</p>
-            <h2>최근 작업 요약</h2>
-          </div>
-        </div>
-
-        {recentJobs.length > 0 ? (
-          <div className="job-list compact">
-            {recentJobs.slice(0, 4).map((job) => (
-              <button
-                type="button"
-                key={job.id}
-                className="job-card compact"
-                onClick={() => onOpenJob(job.id)}
-              >
-                <div className="job-thumb">
-                  {job.outputUrl ? <img src={job.outputUrl} alt="작업 결과" /> : <span>대기</span>}
-                </div>
-                <div className="job-meta">
-                  <div className="job-topline">
-                    <StatusBadge status={job.status} />
-                    <span>{formatDateTime(job.createdAt)}</span>
-                  </div>
-                  <strong>{formatModeLabel(job.mode)}</strong>
-                  <p>{job.promptText || "추가 요청 없음"}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-card empty-card-soft">
-            <strong>최근 작업이 없습니다</strong>
-            <span>최근 작업은 3일 동안만 표시됩니다.</span>
           </div>
         )}
       </div>

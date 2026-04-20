@@ -7,9 +7,10 @@ import { StatusBadge } from "./StatusBadge";
 type Props = {
   jobId: string;
   onBack: () => void;
+  onJobSettled: (jobId: string, status: "completed" | "failed" | "expired") => void;
 };
 
-export function JobDetailView({ jobId, onBack }: Props) {
+export function JobDetailView({ jobId, onBack, onJobSettled }: Props) {
   const [job, setJob] = useState<JobSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -23,6 +24,13 @@ export function JobDetailView({ jobId, onBack }: Props) {
         if (!cancelled) {
           setJob(response.job);
           setErrorMessage("");
+          if (
+            response.job.status === "completed" ||
+            response.job.status === "failed" ||
+            response.job.status === "expired"
+          ) {
+            onJobSettled(response.job.id, response.job.status);
+          }
         }
       } catch (error) {
         if (!cancelled) {
@@ -39,7 +47,7 @@ export function JobDetailView({ jobId, onBack }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [jobId]);
+  }, [jobId, onJobSettled]);
 
   useEffect(() => {
     if (!job || (job.status !== "pending" && job.status !== "processing")) {
@@ -50,6 +58,13 @@ export function JobDetailView({ jobId, onBack }: Props) {
       try {
         const response = await pollJob(job.id);
         setJob(response.job);
+        if (
+          response.job.status === "completed" ||
+          response.job.status === "failed" ||
+          response.job.status === "expired"
+        ) {
+          onJobSettled(response.job.id, response.job.status);
+        }
       } catch (error) {
         if (error instanceof Error) {
           setErrorMessage(error.message);
@@ -58,7 +73,7 @@ export function JobDetailView({ jobId, onBack }: Props) {
     }, 4000);
 
     return () => window.clearInterval(timer);
-  }, [job]);
+  }, [job, onJobSettled]);
 
   if (loading) {
     return (
