@@ -147,3 +147,7 @@ AGENTS.md
 
 # Design reference exports
 stitch_ai/
+
+# Internal API research notes
+FASHN_API_REFERENCE.local.md
+TODO.local.md
