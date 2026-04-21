@@ -112,7 +112,7 @@ export function HistoryView({ onOpenJob }: Props) {
                   </div>
                   <div className="history-card-actions">
                     {job.outputUrl ? (
-                      <a className="primary-button" href={job.outputUrl} download>
+                      <a className="primary-button" href={`/api/jobs/${job.id}/download`}>
                         내려받기
                       </a>
                     ) : null}

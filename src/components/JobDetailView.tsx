@@ -163,7 +163,7 @@ export function JobDetailView({ jobId, onBack, onJobSettled }: Props) {
 
           <div className="action-column">
             {job.outputUrl ? (
-              <a className="primary-button" href={job.outputUrl} download>
+              <a className="primary-button" href={`/api/jobs/${job.id}/download`}>
                 결과 내려받기
               </a>
             ) : null}

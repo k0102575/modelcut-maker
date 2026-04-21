@@ -335,7 +335,7 @@ export function WorkspaceView({
 
               {currentJob.outputUrl ? (
                 <div className="action-row">
-                  <a className="primary-button" href={currentJob.outputUrl} download>
+                  <a className="primary-button" href={`/api/jobs/${currentJob.id}/download`}>
                     결과 내려받기
                   </a>
                   <button
