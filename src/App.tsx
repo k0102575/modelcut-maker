@@ -19,18 +19,14 @@ import { WorkspaceView } from "./components/WorkspaceView";
 function AppLayout({
   user,
   credits,
-  pathname,
   onLogout,
   children,
 }: {
   user: SessionUser;
   credits: number | null;
-  pathname: string;
   onLogout: () => Promise<void>;
   children: ReactNode;
 }) {
-  const activeTab = pathname === "/history" ? "history" : "workspace";
-
   return (
     <div className="app-shell">
       <header className="topbar topbar-fixed">
@@ -39,14 +35,9 @@ function AppLayout({
             <span className="topbar-kicker">Internal Studio</span>
             <span className="topbar-title">모델컷 메이커</span>
           </div>
-          <nav className="topbar-nav">
-            <NavLink to="/" end className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
-              워크스페이스
-            </NavLink>
-            <NavLink to="/history" className={({ isActive }) => `topbar-link ${isActive ? "active" : ""}`}>
-              최근 작업
-            </NavLink>
-          </nav>
+          <p className="topbar-notice">
+            결과 이미지는 바로 확인하고 내려받아 주세요. 최근 작업은 3일 동안만 표시됩니다.
+          </p>
         </div>
         <div className="topbar-actions">
           {credits !== null ? <div className="user-chip">크레딧 {credits}</div> : null}
@@ -68,13 +59,16 @@ function AppLayout({
           </div>
           <div className="sidebar-nav">
             <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `nav-item ${(isActive || activeTab === "workspace") ? "active" : ""}`
-              }
+              to="/virtual"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
-              이미지 생성
+              가상 모델 생성
+            </NavLink>
+            <NavLink
+              to="/person"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              기준 인물에 입히기
             </NavLink>
             <NavLink
               to="/history"
@@ -129,7 +123,6 @@ function ProtectedLayout({
     <AppLayout
       user={session}
       credits={credits}
-      pathname={location.pathname}
       onLogout={onLogout}
     >
       <Outlet />
@@ -238,7 +231,7 @@ export default function App() {
     return (
       <JobDetailView
         jobId={params.jobId}
-        onBack={() => navigateTo("/")}
+        onBack={() => navigateTo(-1)}
         onJobSettled={settleReservedCredits}
       />
     );
@@ -269,7 +262,7 @@ export default function App() {
                     "from" in location.state &&
                     typeof location.state.from === "string"
                       ? location.state.from
-                      : "/";
+                      : "/virtual";
                   navigate(nextPath, { replace: true });
                 } catch (error) {
                   setAuthError(
@@ -303,9 +296,22 @@ export default function App() {
         }
       >
         <Route
-          path="/"
+          path="/virtual"
           element={
             <WorkspaceView
+              workspaceMode="virtual"
+              onOpenHistory={() => navigate("/history")}
+              onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+              onCreditsReserved={reserveCredits}
+              onJobSettled={settleReservedCredits}
+            />
+          }
+        />
+        <Route
+          path="/person"
+          element={
+            <WorkspaceView
+              workspaceMode="person"
               onOpenHistory={() => navigate("/history")}
               onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
               onCreditsReserved={reserveCredits}
@@ -320,7 +326,8 @@ export default function App() {
         <Route path="/jobs/:jobId" element={<JobDetailRouteWithCredits />} />
       </Route>
 
-      <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />
+      <Route path="/" element={<Navigate to={session ? "/virtual" : "/login"} replace />} />
+      <Route path="*" element={<Navigate to={session ? "/virtual" : "/login"} replace />} />
     </Routes>
   );
 }

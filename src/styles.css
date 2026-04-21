@@ -356,6 +356,7 @@ a {
   display: flex;
   align-items: center;
   gap: 2rem;
+  min-width: 0;
 }
 
 .topbar-brand-copy {
@@ -378,22 +379,11 @@ a {
   letter-spacing: -0.02em;
 }
 
-.topbar-nav {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.topbar-link {
+.topbar-notice {
+  margin: 0;
   color: var(--text-subtle);
-  font-weight: 600;
-  padding: 0.2rem 0;
-  border-bottom: 2px solid transparent;
-}
-
-.topbar-link.active {
-  color: var(--text-main);
-  border-color: rgba(30, 58, 95, 0.85);
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 .topbar-actions {
@@ -579,6 +569,52 @@ a {
   margin: 0.4rem 0 0;
   max-width: 42rem;
   color: var(--text-subtle);
+}
+
+.workspace-mode-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.2rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-md);
+}
+
+.workspace-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.workspace-mode-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background: #f8fafc;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.workspace-mode-option strong {
+  font-size: 0.98rem;
+}
+
+.workspace-mode-option span {
+  color: var(--text-subtle);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.workspace-mode-option.active {
+  border-color: rgba(30, 58, 95, 0.34);
+  background: linear-gradient(180deg, rgba(220, 231, 245, 0.9), rgba(236, 242, 248, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(30, 58, 95, 0.08);
 }
 
 .workspace-config-grid {
@@ -1027,14 +1063,17 @@ a {
 
 @media (max-width: 960px) {
   .shell-body,
+  .workspace-mode-switch,
   .workspace-config-grid,
   .history-grid,
   .detail-grid {
     grid-template-columns: 1fr;
   }
 
-  .topbar-nav {
-    display: none;
+  .topbar-brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
   }
 
   .sidebar {

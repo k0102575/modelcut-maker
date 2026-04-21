@@ -4,6 +4,7 @@ import {
   getProductToModelCreditCost,
   MAX_IMAGE_FILE_SIZE_BYTES,
   type GenerationMode,
+  type JobMode,
   type JobSummary,
 } from "../../shared/contracts";
 import { createJob, pollJob } from "../lib/api";
@@ -12,6 +13,7 @@ import { FileDropField } from "./FileDropField";
 import { StatusBadge } from "./StatusBadge";
 
 type Props = {
+  workspaceMode: JobMode;
   onOpenHistory: () => void;
   onOpenJob: (jobId: string) => void;
   onCreditsReserved: (jobId: string, cost: number) => void;
@@ -35,6 +37,7 @@ function validateClientFile(file: File | null, required = false): string | null 
 }
 
 export function WorkspaceView({
+  workspaceMode,
   onOpenHistory,
   onOpenJob,
   onCreditsReserved,
@@ -42,6 +45,7 @@ export function WorkspaceView({
 }: Props) {
   const [productImage, setProductImage] = useState<File | null>(null);
   const [modelImage, setModelImage] = useState<File | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
   const [category, setCategory] = useState("상의");
   const [modelPreset, setModelPreset] = useState("여성 가상모델");
   const [cameraAngle, setCameraAngle] = useState("정면");
@@ -52,6 +56,7 @@ export function WorkspaceView({
   const [currentJob, setCurrentJob] = useState<JobSummary | null>(null);
 
   const canSubmit = useMemo(() => !loading, [loading]);
+  const isVirtualMode = workspaceMode === "virtual";
 
   useEffect(() => {
     if (!currentJob || (currentJob.status !== "pending" && currentJob.status !== "processing")) {
@@ -84,9 +89,11 @@ export function WorkspaceView({
       <div className="workspace-shell">
         <div className="workspace-heading page-header">
           <p className="eyebrow">Workspace</p>
-          <h2>모델컷 생성실</h2>
+          <h2>{isVirtualMode ? "가상 모델 생성" : "기준 인물에 입히기"}</h2>
           <p className="workspace-copy">
-            상품 사진을 올리고 필요한 설정을 고른 뒤 바로 생성해 보세요.
+            {isVirtualMode
+              ? "상품 사진으로 새 모델컷을 만들고, 필요하면 배경 사진과 추가 프롬프트를 함께 넣어 주세요."
+              : "사람 사진을 기준으로 상품을 입힌 이미지를 만듭니다. 필요한 사진만 올리고 바로 생성해 보세요."}
           </p>
         </div>
 
@@ -100,21 +107,36 @@ export function WorkspaceView({
         />
 
         <div className="workspace-config-grid">
-          <FileDropField
-            label="사람 사진"
-            hint="원하는 사람이 있으면 함께 올려주세요"
-            file={modelImage}
-            onChange={setModelImage}
-            size="compact"
-          />
+          {isVirtualMode ? (
+            <FileDropField
+              label="배경 사진"
+              hint="원하는 배경이 있으면 함께 올려주세요"
+              file={backgroundImage}
+              onChange={setBackgroundImage}
+              size="compact"
+            />
+          ) : (
+            <FileDropField
+              label="기준 인물 사진"
+              hint="옷을 입힐 사람 사진을 올려주세요"
+              required
+              file={modelImage}
+              onChange={setModelImage}
+              size="compact"
+            />
+          )}
 
           <div className="field-card settings-card">
             <div className="field-head">
-            <div>
-              <p className="field-label">모델 및 카테고리 설정</p>
-              <p className="field-hint">선택한 값은 생성 요청 문구에 함께 반영됩니다</p>
+              <div>
+                <p className="field-label">{isVirtualMode ? "가상 모델 설정" : "출력 설정"}</p>
+                <p className="field-hint">
+                  {isVirtualMode
+                    ? "가상 모델 생성에 필요한 옵션을 고를 수 있습니다"
+                    : "기준 인물 사진에서는 배경 사진 없이 결과를 생성합니다"}
+                </p>
+              </div>
             </div>
-          </div>
 
             <div className="settings-stack">
               <label className="select-group">
@@ -126,17 +148,19 @@ export function WorkspaceView({
                 </select>
               </label>
 
-              <label className="select-group">
-                <span>모델 선택</span>
-                <select value={modelPreset} onChange={(event) => setModelPreset(event.target.value)}>
-                  <option value="성별 자동 (가상모델)">성별 자동 (가상모델)</option>
-                  <option value="남성 가상모델">남성 가상모델</option>
-                  <option value="여성 가상모델">여성 가상모델</option>
-                </select>
-              </label>
+              {isVirtualMode ? (
+                <label className="select-group">
+                  <span>모델 선택</span>
+                  <select value={modelPreset} onChange={(event) => setModelPreset(event.target.value)}>
+                    <option value="성별 자동 (가상모델)">성별 자동 (가상모델)</option>
+                    <option value="남성 가상모델">남성 가상모델</option>
+                    <option value="여성 가상모델">여성 가상모델</option>
+                  </select>
+                </label>
+              ) : null}
 
               <label className="select-group">
-                <span>모델 각도</span>
+                <span>촬영 방향</span>
                 <select value={cameraAngle} onChange={(event) => setCameraAngle(event.target.value)}>
                   <option value="정면">정면</option>
                   <option value="측면">측면</option>
@@ -163,13 +187,21 @@ export function WorkspaceView({
           <div className="field-head">
             <div>
               <p className="field-label">추가 프롬프트</p>
-              <p className="field-hint">배경이나 분위기를 짧게 적어주세요</p>
+              <p className="field-hint">
+                {isVirtualMode
+                  ? "분위기나 연출을 짧게 적어주세요"
+                  : "자세나 느낌을 더 원하는 방향으로 적어주세요"}
+              </p>
             </div>
             <span className="pill">선택</span>
           </div>
           <textarea
             className="prompt-textarea"
-            placeholder="예: 밝은 스튜디오 배경, 자연스러운 햇살 느낌"
+            placeholder={
+              isVirtualMode
+                ? "예: 동양인 여자 30대, 배경은 없이, 자연스러운 쇼핑몰 촬영 느낌"
+                : "예: 정면에 가깝게, 옷 실루엣이 잘 보이게"
+            }
             value={promptText}
             onChange={(event) => setPromptText(event.target.value)}
           />
@@ -183,15 +215,23 @@ export function WorkspaceView({
           disabled={!canSubmit}
           onClick={async () => {
             const productValidation = validateClientFile(productImage, true);
-            const modelValidation = validateClientFile(modelImage);
+            const modelValidation = validateClientFile(modelImage, !isVirtualMode);
+            const backgroundValidation = isVirtualMode
+              ? validateClientFile(backgroundImage)
+              : null;
 
-            if (productValidation || modelValidation) {
-              setErrorMessage(productValidation ?? modelValidation ?? "");
+            if (productValidation || modelValidation || backgroundValidation) {
+              setErrorMessage(productValidation ?? modelValidation ?? backgroundValidation ?? "");
               return;
             }
 
             if (!productImage) {
               setErrorMessage("상품 사진을 올려주세요");
+              return;
+            }
+
+            if (!isVirtualMode && !modelImage) {
+              setErrorMessage("기준 인물 사진을 올려주세요");
               return;
             }
 
@@ -201,14 +241,19 @@ export function WorkspaceView({
 
               const formData = new FormData();
               formData.append("productImage", productImage);
-              if (modelImage) {
+              if (!isVirtualMode && modelImage) {
                 formData.append("modelImage", modelImage);
               }
+              if (isVirtualMode && backgroundImage) {
+                formData.append("backgroundImage", backgroundImage);
+              }
               formData.append("generationMode", generationMode);
+
               const composedPrompt = [
                 `카테고리: ${category}`,
-                `모델 설정: ${modelPreset}`,
+                isVirtualMode ? `모델 설정: ${modelPreset}` : null,
                 `촬영 방향: ${cameraAngle}`,
+                isVirtualMode && backgroundImage ? "배경 참고: 사용" : null,
                 promptText.trim(),
               ]
                 .filter(Boolean)
@@ -221,6 +266,7 @@ export function WorkspaceView({
               setCurrentJob(response.job);
               setProductImage(null);
               setModelImage(null);
+              setBackgroundImage(null);
               setPromptText("");
             } catch (error) {
               setErrorMessage(

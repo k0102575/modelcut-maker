@@ -107,6 +107,7 @@ export async function createPrediction(
   input: {
     productImage: string;
     modelImage?: string;
+    backgroundImage?: string;
     prompt: string;
     generationMode: GenerationMode;
   },
@@ -116,6 +117,7 @@ export async function createPrediction(
     inputs: {
       product_image: input.productImage,
       ...(input.modelImage ? { model_image: input.modelImage } : {}),
+      ...(input.backgroundImage ? { background_reference: input.backgroundImage } : {}),
       ...(input.prompt ? { prompt: input.prompt } : {}),
       resolution: "1k",
       aspect_ratio: "3:4",

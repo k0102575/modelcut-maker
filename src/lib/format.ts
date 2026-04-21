@@ -29,14 +29,14 @@ export function formatStatusLabel(status: JobStatus): string {
 }
 
 export function formatModeLabel(mode: "person" | "virtual"): string {
-  return mode === "person" ? "사람 사진 사용" : "가상 모델 생성";
+  return mode === "person" ? "기준 인물에 입히기" : "가상 모델 생성";
 }
 
 export function parsePromptSummary(promptText: string): {
   metadata: string[];
   prompt: string;
 } {
-  const metadataPrefixes = ["카테고리:", "모델 설정:", "촬영 방향:"];
+  const metadataPrefixes = ["카테고리:", "모델 설정:", "촬영 방향:", "배경 참고:"];
   const items = promptText
     .split(" / ")
     .map((item) => item.trim())

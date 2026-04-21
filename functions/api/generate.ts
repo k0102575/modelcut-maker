@@ -30,6 +30,7 @@ export const onRequestPost = async (context: {
       true,
     );
     const modelImageFile = validateImageFile(formData.get("modelImage"), "사람 사진");
+    const backgroundImageFile = validateImageFile(formData.get("backgroundImage"), "배경 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
     const generationModeValue = String(formData.get("generationMode") ?? "balanced");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
@@ -41,6 +42,10 @@ export const onRequestPost = async (context: {
     const predictionId = await createPrediction(env.FASHN_API_KEY, {
       productImage: await fileToDataUrl(productImageFile as File),
       modelImage: modelImageFile ? await fileToDataUrl(modelImageFile) : undefined,
+      backgroundImage:
+        backgroundImageFile && !modelImageFile
+          ? await fileToDataUrl(backgroundImageFile)
+          : undefined,
       prompt: promptText,
       generationMode,
     });
