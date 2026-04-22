@@ -16,7 +16,7 @@ export type JobStatus =
   | "failed"
   | "expired";
 
-export type JobMode = "person" | "virtual";
+export type JobMode = "person" | "virtual" | "model";
 export type GenerationMode = (typeof FASHN_GENERATION_MODES)[number];
 export type TryOnMaxGenerationMode = (typeof TRYON_MAX_GENERATION_MODES)[number];
 

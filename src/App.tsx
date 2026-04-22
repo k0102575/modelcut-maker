@@ -11,9 +11,11 @@ import {
 } from "react-router-dom";
 import type { SessionUser } from "../shared/contracts";
 import { fetchCredits, fetchSession, login, logout } from "./lib/api";
+import { HelpView } from "./components/HelpView";
 import { HistoryView } from "./components/HistoryView";
 import { JobDetailView } from "./components/JobDetailView";
 import { LoginView } from "./components/LoginView";
+import { ModelCreateView } from "./components/ModelCreateView";
 import { WorkspaceView } from "./components/WorkspaceView";
 
 function AppLayout({
@@ -80,10 +82,22 @@ function AppLayout({
               사람 사진에 옷 입히기
             </NavLink>
             <NavLink
+              to="/model"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              모델 이미지 먼저 만들기
+            </NavLink>
+            <NavLink
               to="/history"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               최근 작업
+            </NavLink>
+            <NavLink
+              to="/help"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              도움말
             </NavLink>
           </div>
         </aside>
@@ -352,6 +366,18 @@ export default function App() {
           path="/history"
           element={<HistoryView onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)} />}
         />
+        <Route
+          path="/model"
+          element={
+            <ModelCreateView
+              onOpenHistory={() => navigate("/history")}
+              onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+              onCreditsReserved={reserveCredits}
+              onJobSettled={settleReservedCredits}
+            />
+          }
+        />
+        <Route path="/help" element={<HelpView />} />
         <Route path="/jobs/:jobId" element={<JobDetailRouteWithCredits />} />
       </Route>
 

@@ -150,6 +150,44 @@ export async function createPrediction(
   return data.id;
 }
 
+export async function createModelPrediction(
+  apiKey: string,
+  input: {
+    prompt: string;
+    imageReference?: string;
+    generationMode: GenerationMode;
+  },
+): Promise<string> {
+  const payload = {
+    model_name: "model-create",
+    inputs: {
+      prompt: input.prompt,
+      ...(input.imageReference ? { image_reference: input.imageReference } : {}),
+      resolution: "1k",
+      aspect_ratio: "3:4",
+      generation_mode: input.generationMode,
+      output_format: "png",
+      return_base64: false,
+    },
+  };
+
+  const response = await fetch(`${FASHN_BASE_URL}/run`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json()) as FashnCreateResponse;
+  if (!response.ok || !data.id) {
+    throw new Error(readApiErrorMessage(data) ?? "모델 생성 요청에 실패했습니다. 다시 시도해 주세요");
+  }
+
+  return data.id;
+}
+
 export async function getPredictionStatus(
   apiKey: string,
   predictionId: string,

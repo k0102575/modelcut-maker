@@ -363,7 +363,7 @@ export function WorkspaceView({
                   <dd>{formatDateTime(currentJob.createdAt)}</dd>
                 </div>
                 <div>
-                  <dt>추가 요청</dt>
+                  <dt>요청 내용</dt>
                   <dd>{currentJob.promptText || "없음"}</dd>
                 </div>
               </dl>

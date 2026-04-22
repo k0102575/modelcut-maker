@@ -61,6 +61,14 @@ export async function createJob(formData: FormData): Promise<JobResponse> {
   });
 }
 
+export async function createModelJob(formData: FormData): Promise<JobResponse> {
+  return request<JobResponse>("/api/model-create", {
+    method: "POST",
+    body: formData,
+    headers: {},
+  });
+}
+
 export async function fetchCredits(): Promise<CreditsResponse> {
   return request<CreditsResponse>("/api/credits", {
     method: "GET",

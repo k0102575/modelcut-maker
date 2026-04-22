@@ -149,13 +149,13 @@ export function JobDetailView({ jobId, onBack, onJobSettled }: Props) {
               <dd>{formatDateTime(job.expiresAt)}</dd>
             </div>
             <div>
-              <dt>추가 요청</dt>
+              <dt>요청 내용</dt>
               <dd>{job.promptText || "없음"}</dd>
             </div>
           </dl>
 
           <div className="detail-summary-block">
-            <h3>추가 프롬프트</h3>
+            <h3>요청 내용</h3>
             <p className="detail-prompt">{job.promptText || "없음"}</p>
           </div>
 

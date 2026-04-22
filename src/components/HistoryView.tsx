@@ -102,12 +102,12 @@ export function HistoryView({ onOpenJob }: Props) {
                           }
                         }}
                       >
-                        <span className="history-prompt-label">추가 프롬프트</span>
+                        <span className="history-prompt-label">요청 내용</span>
                         <span className="history-prompt-copy">클릭해서 복사</span>
                         <span className="history-prompt-text">{promptSummary.prompt}</span>
                       </button>
                     ) : (
-                      <div className="history-prompt-empty">추가 프롬프트 없음</div>
+                      <div className="history-prompt-empty">요청 내용 없음</div>
                     )}
                   </div>
                   <div className="history-card-actions">

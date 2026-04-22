@@ -28,8 +28,16 @@ export function formatStatusLabel(status: JobStatus): string {
   }
 }
 
-export function formatModeLabel(mode: "person" | "virtual"): string {
-  return mode === "person" ? "사람 사진에 옷 입히기" : "옷으로 바로 모델컷 만들기";
+export function formatModeLabel(mode: "person" | "virtual" | "model"): string {
+  if (mode === "person") {
+    return "사람 사진에 옷 입히기";
+  }
+
+  if (mode === "model") {
+    return "모델 이미지 먼저 만들기";
+  }
+
+  return "옷으로 바로 모델컷 만들기";
 }
 
 export function parsePromptSummary(promptText: string): {
