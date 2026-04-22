@@ -86,9 +86,6 @@ function AppLayout({
               최근 작업
             </NavLink>
           </div>
-          <div className="sidebar-note">
-            결과 이미지는 바로 확인하고 내려받아 주세요. 최근 작업은 3일 동안만 표시됩니다.
-          </div>
         </aside>
 
         <main className="content-panel">{children}</main>
