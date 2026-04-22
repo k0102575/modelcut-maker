@@ -394,6 +394,7 @@ a {
   justify-content: flex-end;
 }
 
+.credit-chip,
 .user-chip,
 .pill,
 .status-badge {
@@ -405,6 +406,27 @@ a {
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.credit-chip {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #fff7ed;
+  border: 1px solid rgba(180, 83, 9, 0.28);
+  box-shadow: 0 10px 24px rgba(217, 119, 6, 0.18);
+}
+
+.credit-chip.loading {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: #f0fdfa;
+  border-color: rgba(15, 118, 110, 0.24);
+  box-shadow: 0 10px 24px rgba(20, 184, 166, 0.16);
+}
+
+.credit-chip.error {
+  background: linear-gradient(135deg, #991b1b, #dc2626);
+  color: #fef2f2;
+  border-color: rgba(153, 27, 27, 0.26);
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.16);
 }
 
 .user-chip,
@@ -651,6 +673,21 @@ a {
 .detail-card,
 .empty-card {
   padding: 1.2rem;
+}
+
+.empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.empty-card strong {
+  line-height: 1.45;
+}
+
+.empty-card span {
+  line-height: 1.6;
 }
 
 .field-card-compact {

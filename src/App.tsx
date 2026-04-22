@@ -17,13 +17,15 @@ import { LoginView } from "./components/LoginView";
 import { WorkspaceView } from "./components/WorkspaceView";
 
 function AppLayout({
-  user,
   credits,
+  creditsLoading,
+  creditsError,
   onLogout,
   children,
 }: {
-  user: SessionUser;
   credits: number | null;
+  creditsLoading: boolean;
+  creditsError: boolean;
   onLogout: () => Promise<void>;
   children: ReactNode;
 }) {
@@ -40,8 +42,15 @@ function AppLayout({
           </p>
         </div>
         <div className="topbar-actions">
-          {credits !== null ? <div className="user-chip">크레딧 {credits}</div> : null}
-          <div className="user-chip">{user.label}</div>
+          <div
+            className={`credit-chip ${creditsLoading ? "loading" : ""} ${creditsError ? "error" : ""}`}
+          >
+            {creditsLoading
+              ? "크레딧 불러오는 중"
+              : creditsError
+                ? "크레딧 확인 안됨"
+                : `크레딧 ${credits ?? 0}`}
+          </div>
           <button type="button" className="secondary-button" onClick={() => void onLogout()}>
             로그아웃
           </button>
@@ -102,11 +111,15 @@ function ProtectedLayout({
   session,
   sessionLoading,
   credits,
+  creditsLoading,
+  creditsError,
   onLogout,
 }: {
   session: SessionUser | null;
   sessionLoading: boolean;
   credits: number | null;
+  creditsLoading: boolean;
+  creditsError: boolean;
   onLogout: () => Promise<void>;
 }) {
   const location = useLocation();
@@ -121,8 +134,9 @@ function ProtectedLayout({
 
   return (
     <AppLayout
-      user={session}
       credits={credits}
+      creditsLoading={creditsLoading}
+      creditsError={creditsError}
       onLogout={onLogout}
     >
       <Outlet />
@@ -136,6 +150,8 @@ export default function App() {
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(false);
+  const [creditsError, setCreditsError] = useState(false);
   const reservedCreditsByJobIdRef = useRef<Record<string, number>>({});
   const navigate = useNavigate();
   const location = useLocation();
@@ -166,6 +182,8 @@ export default function App() {
   useEffect(() => {
     if (!session) {
       setCredits(null);
+      setCreditsLoading(false);
+      setCreditsError(false);
       reservedCreditsByJobIdRef.current = {};
       return undefined;
     }
@@ -173,6 +191,11 @@ export default function App() {
     let cancelled = false;
 
     async function loadCredits() {
+      if (!cancelled) {
+        setCreditsLoading(true);
+        setCreditsError(false);
+      }
+
       try {
         const response = await fetchCredits();
         if (!cancelled) {
@@ -181,6 +204,11 @@ export default function App() {
       } catch {
         if (!cancelled) {
           setCredits(null);
+          setCreditsError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setCreditsLoading(false);
         }
       }
     }
@@ -285,10 +313,14 @@ export default function App() {
             session={session}
             sessionLoading={sessionLoading}
             credits={credits}
+            creditsLoading={creditsLoading}
+            creditsError={creditsError}
             onLogout={async () => {
               await logout();
               reservedCreditsByJobIdRef.current = {};
               setCredits(null);
+              setCreditsLoading(false);
+              setCreditsError(false);
               setSession(null);
               navigate("/login", { replace: true });
             }}
