@@ -113,7 +113,7 @@ export function WorkspaceView({
       <div className="workspace-shell">
         <div className="workspace-heading page-header">
           <p className="eyebrow">Workspace</p>
-          <h2>{isVirtualMode ? "가상 모델 생성" : "기준 인물에 입히기"}</h2>
+          <h2>{isVirtualMode ? "옷으로 바로 모델컷 만들기" : "사람 사진에 옷 입히기"}</h2>
           <p className="workspace-copy">
             {isVirtualMode
               ? "상품 사진으로 새 모델컷을 만들고, 필요하면 배경 사진과 추가 프롬프트를 함께 넣어 주세요."

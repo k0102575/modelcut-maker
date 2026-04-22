@@ -34,7 +34,7 @@ function AppLayout({
       <header className="topbar topbar-fixed">
         <div className="topbar-brand">
           <div className="topbar-brand-copy">
-            <span className="topbar-kicker">Internal Studio</span>
+            <span className="topbar-kicker">새로본</span>
             <span className="topbar-title">모델컷 메이커</span>
           </div>
           <p className="topbar-notice">
@@ -62,8 +62,8 @@ function AppLayout({
           <div className="sidebar-brand">
             <div className="sidebar-brand-mark">AI</div>
             <div>
-              <strong>Modelcut Maker</strong>
-              <span>내부용 이미지 생성 도구</span>
+              <strong>새로본</strong>
+              <span>모델컷 메이커</span>
             </div>
           </div>
           <div className="sidebar-nav">
@@ -71,13 +71,13 @@ function AppLayout({
               to="/virtual"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
-              가상 모델 생성
+              옷으로 바로 모델컷 만들기
             </NavLink>
             <NavLink
               to="/person"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
-              기준 인물에 입히기
+              사람 사진에 옷 입히기
             </NavLink>
             <NavLink
               to="/history"

@@ -29,7 +29,7 @@ export function formatStatusLabel(status: JobStatus): string {
 }
 
 export function formatModeLabel(mode: "person" | "virtual"): string {
-  return mode === "person" ? "기준 인물에 입히기" : "가상 모델 생성";
+  return mode === "person" ? "사람 사진에 옷 입히기" : "옷으로 바로 모델컷 만들기";
 }
 
 export function parsePromptSummary(promptText: string): {
