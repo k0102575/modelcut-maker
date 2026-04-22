@@ -10,6 +10,7 @@
 - Database: Cloudflare D1
 - AI: FASHN API
 - Package manager: pnpm
+- Deployment: Cloudflare Pages Git integration
 
 ## 디자인 시스템 기준
 
