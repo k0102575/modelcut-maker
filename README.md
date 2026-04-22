@@ -138,7 +138,7 @@ pnpm exec wrangler d1 migrations apply modelcut-maker
 
 ### 5. D1 바인딩 연결
 
-공개 저장소의 기본 [wrangler.toml](wrangler.toml) 에는 실제 D1 식별자를 넣지 않습니다.
+공개 저장소의 기본 [wrangler.toml](wrangler.toml) 은 로컬 개발용 최소 설정만 유지하고, 실제 배포용 Pages 바인딩과 환경변수는 Cloudflare 대시보드에서 관리합니다.
 
 - 로컬 마이그레이션: `wrangler.local.toml` 사용
 - 로컬 통합 테스트: `pnpm exec wrangler pages dev dist --d1 DB=실제_DATABASE_ID`

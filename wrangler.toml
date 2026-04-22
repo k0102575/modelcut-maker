@@ -1,3 +1,4 @@
 name = "modelcut-maker"
 compatibility_date = "2026-04-15"
-pages_build_output_dir = "dist"
+
+# Production Pages settings are managed in the Cloudflare dashboard.
