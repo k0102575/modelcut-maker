@@ -32,6 +32,7 @@ export const onRequestPost = async (context: {
     const modelImageFile = validateImageFile(formData.get("modelImage"), "사람 사진");
     const backgroundImageFile = validateImageFile(formData.get("backgroundImage"), "배경 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
+    const apiPromptText = String(formData.get("apiPromptText") ?? promptText).trim();
     const generationModeValue = String(formData.get("generationMode") ?? "balanced");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
       generationModeValue as GenerationMode,
@@ -39,20 +40,22 @@ export const onRequestPost = async (context: {
       ? (generationModeValue as GenerationMode)
       : "balanced";
 
+    const mode = modelImageFile ? "person" : "virtual";
     const predictionId = await createPrediction(env.FASHN_API_KEY, {
+      mode,
       productImage: await fileToDataUrl(productImageFile as File),
       modelImage: modelImageFile ? await fileToDataUrl(modelImageFile) : undefined,
       backgroundImage:
         backgroundImageFile && !modelImageFile
           ? await fileToDataUrl(backgroundImageFile)
           : undefined,
-      prompt: promptText,
+      prompt: apiPromptText,
       generationMode,
     });
 
     const job = await insertJob(env, {
       predictionId,
-      mode: modelImageFile ? "person" : "virtual",
+      mode,
       promptText,
       hasModelImage: Boolean(modelImageFile),
     });

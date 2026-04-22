@@ -4,6 +4,7 @@ import {
   type JobStatus,
   type CreditsSummary,
   type GenerationMode,
+  type JobMode,
 } from "../../shared/contracts";
 
 const FASHN_BASE_URL = "https://api.fashn.ai/v1";
@@ -105,6 +106,7 @@ export function validateImageFile(
 export async function createPrediction(
   apiKey: string,
   input: {
+    mode: JobMode;
     productImage: string;
     modelImage?: string;
     backgroundImage?: string;
@@ -112,16 +114,20 @@ export async function createPrediction(
     generationMode: GenerationMode;
   },
 ): Promise<string> {
+  const isPersonMode = input.mode === "person";
   const payload = {
-    model_name: "product-to-model",
+    model_name: isPersonMode ? "tryon-max" : "product-to-model",
     inputs: {
       product_image: input.productImage,
       ...(input.modelImage ? { model_image: input.modelImage } : {}),
-      ...(input.backgroundImage ? { background_reference: input.backgroundImage } : {}),
+      ...(!isPersonMode && input.backgroundImage
+        ? { background_reference: input.backgroundImage }
+        : {}),
       ...(input.prompt ? { prompt: input.prompt } : {}),
       resolution: "1k",
       aspect_ratio: "3:4",
-      generation_mode: input.generationMode,
+      generation_mode:
+        isPersonMode && input.generationMode === "fast" ? "balanced" : input.generationMode,
       output_format: "png",
       return_base64: false,
     },

@@ -7,6 +7,7 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
 export const ACCEPT_IMAGE_FILES = ".jpg,.jpeg,.png,.webp";
 
 export const FASHN_GENERATION_MODES = ["fast", "balanced", "quality"] as const;
+export const TRYON_MAX_GENERATION_MODES = ["balanced", "quality"] as const;
 
 export type JobStatus =
   | "pending"
@@ -17,6 +18,7 @@ export type JobStatus =
 
 export type JobMode = "person" | "virtual";
 export type GenerationMode = (typeof FASHN_GENERATION_MODES)[number];
+export type TryOnMaxGenerationMode = (typeof TRYON_MAX_GENERATION_MODES)[number];
 
 export function getProductToModelCreditCost(mode: GenerationMode): number {
   if (mode === "fast") {
@@ -28,6 +30,14 @@ export function getProductToModelCreditCost(mode: GenerationMode): number {
   }
 
   return 2;
+}
+
+export function getGenerationCreditCost(jobMode: JobMode, mode: GenerationMode): number {
+  if (jobMode === "person") {
+    return mode === "quality" ? 3 : 2;
+  }
+
+  return getProductToModelCreditCost(mode);
 }
 
 export type SessionUser = {

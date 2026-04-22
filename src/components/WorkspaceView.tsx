@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ALLOWED_IMAGE_MIME_TYPES,
-  getProductToModelCreditCost,
+  getGenerationCreditCost,
   MAX_IMAGE_FILE_SIZE_BYTES,
   type GenerationMode,
   type JobMode,
@@ -57,6 +57,30 @@ export function WorkspaceView({
 
   const canSubmit = useMemo(() => !loading, [loading]);
   const isVirtualMode = workspaceMode === "virtual";
+  const generationModeOptions = isVirtualMode
+    ? [
+        { value: "fast" as GenerationMode, label: "빠르게 (1 크레딧)" },
+        { value: "balanced" as GenerationMode, label: "균형 (2 크레딧)" },
+        { value: "quality" as GenerationMode, label: "고품질 (3 크레딧)" },
+      ]
+    : [
+        { value: "balanced" as GenerationMode, label: "균형 (2 크레딧)" },
+        { value: "quality" as GenerationMode, label: "고품질 (3 크레딧)" },
+      ];
+
+  useEffect(() => {
+    setProductImage(null);
+    setModelImage(null);
+    setBackgroundImage(null);
+    setCategory("상의");
+    setModelPreset("여성 가상모델");
+    setCameraAngle("정면");
+    setGenerationMode("balanced");
+    setPromptText("");
+    setLoading(false);
+    setErrorMessage("");
+    setCurrentJob(null);
+  }, [workspaceMode]);
 
   useEffect(() => {
     if (!currentJob || (currentJob.status !== "pending" && currentJob.status !== "processing")) {
@@ -93,7 +117,7 @@ export function WorkspaceView({
           <p className="workspace-copy">
             {isVirtualMode
               ? "상품 사진으로 새 모델컷을 만들고, 필요하면 배경 사진과 추가 프롬프트를 함께 넣어 주세요."
-              : "사람 사진을 기준으로 상품을 입힌 이미지를 만듭니다. 필요한 사진만 올리고 바로 생성해 보세요."}
+              : "사람 사진을 기준으로 상품을 입힌 이미지를 만듭니다. 착용 방식은 조금 조정할 수 있지만 큰 연출 변경은 제한될 수 있습니다."}
           </p>
         </div>
 
@@ -172,11 +196,21 @@ export function WorkspaceView({
                 <span>생성 품질</span>
                 <select
                   value={generationMode}
-                  onChange={(event) => setGenerationMode(event.target.value as GenerationMode)}
+                  onChange={(event) => {
+                    const nextMode = event.target.value as GenerationMode;
+                    if (!isVirtualMode && nextMode !== "balanced" && nextMode !== "quality") {
+                      setGenerationMode("balanced");
+                      return;
+                    }
+
+                    setGenerationMode(nextMode);
+                  }}
                 >
-                  <option value="fast">빠르게 (1 크레딧)</option>
-                  <option value="balanced">균형 (2 크레딧)</option>
-                  <option value="quality">고품질 (3 크레딧)</option>
+                  {generationModeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -190,7 +224,7 @@ export function WorkspaceView({
               <p className="field-hint">
                 {isVirtualMode
                   ? "분위기나 연출을 짧게 적어주세요"
-                  : "자세나 느낌을 더 원하는 방향으로 적어주세요"}
+                  : "소매 접기나 넣어 입기처럼 작은 착용 방식만 짧게 적어주세요"}
               </p>
             </div>
             <span className="pill">선택</span>
@@ -200,7 +234,7 @@ export function WorkspaceView({
             placeholder={
               isVirtualMode
                 ? "예: 동양인 여자 30대, 배경은 없이, 자연스러운 쇼핑몰 촬영 느낌"
-                : "예: 정면에 가깝게, 옷 실루엣이 잘 보이게"
+                : "예: 셔츠를 넣어 입기, 소매를 살짝 걷기"
             }
             value={promptText}
             onChange={(event) => setPromptText(event.target.value)}
@@ -249,7 +283,7 @@ export function WorkspaceView({
               }
               formData.append("generationMode", generationMode);
 
-              const composedPrompt = [
+              const summaryPrompt = [
                 `카테고리: ${category}`,
                 isVirtualMode ? `모델 설정: ${modelPreset}` : null,
                 `촬영 방향: ${cameraAngle}`,
@@ -259,10 +293,11 @@ export function WorkspaceView({
                 .filter(Boolean)
                 .join(" / ");
 
-              formData.append("promptText", composedPrompt);
+              formData.append("promptText", summaryPrompt);
+              formData.append("apiPromptText", isVirtualMode ? summaryPrompt : promptText.trim());
 
               const response = await createJob(formData);
-              onCreditsReserved(response.job.id, getProductToModelCreditCost(generationMode));
+              onCreditsReserved(response.job.id, getGenerationCreditCost(workspaceMode, generationMode));
               setCurrentJob(response.job);
               setProductImage(null);
               setModelImage(null);
