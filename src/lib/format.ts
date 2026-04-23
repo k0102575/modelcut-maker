@@ -44,7 +44,22 @@ export function parsePromptSummary(promptText: string): {
   metadata: string[];
   prompt: string;
 } {
-  const metadataPrefixes = ["카테고리:", "모델 설정:", "촬영 방향:", "배경 참고:"];
+  const metadataPrefixes = [
+    "카테고리:",
+    "모델 성별:",
+    "모델 설정:",
+    "촬영 방향:",
+    "배경 참고:",
+    "사진 비율:",
+    "이미지 비율:",
+    "배경 느낌:",
+    "배경 스타일:",
+    "모델 느낌:",
+    "촬영 구도:",
+    "사람 느낌:",
+    "보이는 범위:",
+    "참고 사진:",
+  ];
   const items = promptText
     .split(" / ")
     .map((item) => item.trim())

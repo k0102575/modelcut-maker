@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ALLOWED_IMAGE_MIME_TYPES,
+  type AspectRatio,
   getGenerationCreditCost,
   MAX_IMAGE_FILE_SIZE_BYTES,
   type GenerationMode,
@@ -47,8 +48,10 @@ export function WorkspaceView({
   const [modelImage, setModelImage] = useState<File | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
   const [category, setCategory] = useState("상의");
-  const [modelPreset, setModelPreset] = useState("여성 가상모델");
+  const [modelPreset, setModelPreset] = useState("여성");
   const [cameraAngle, setCameraAngle] = useState("정면");
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("3:4");
+  const [backgroundStyle, setBackgroundStyle] = useState("배경 없이");
   const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,8 +76,10 @@ export function WorkspaceView({
     setModelImage(null);
     setBackgroundImage(null);
     setCategory("상의");
-    setModelPreset("여성 가상모델");
+    setModelPreset("여성");
     setCameraAngle("정면");
+    setAspectRatio("3:4");
+    setBackgroundStyle("배경 없이");
     setGenerationMode("balanced");
     setPromptText("");
     setLoading(false);
@@ -174,11 +179,42 @@ export function WorkspaceView({
 
               {isVirtualMode ? (
                 <label className="select-group">
-                  <span>모델 선택</span>
+                  <span>모델 성별</span>
                   <select value={modelPreset} onChange={(event) => setModelPreset(event.target.value)}>
-                    <option value="성별 자동 (가상모델)">성별 자동 (가상모델)</option>
-                    <option value="남성 가상모델">남성 가상모델</option>
-                    <option value="여성 가상모델">여성 가상모델</option>
+                    <option value="자동 선택">자동 선택</option>
+                    <option value="남성">남성</option>
+                    <option value="여성">여성</option>
+                  </select>
+                </label>
+              ) : null}
+
+              {isVirtualMode ? (
+                <label className="select-group">
+                  <span>사진 비율</span>
+                  <select
+                    value={aspectRatio}
+                    onChange={(event) => setAspectRatio(event.target.value as AspectRatio)}
+                  >
+                    <option value="1:1">정사각형 (1:1)</option>
+                    <option value="3:4">세로형 (기본, 3:4)</option>
+                    <option value="4:5">세로형 길게 (4:5)</option>
+                  </select>
+                </label>
+              ) : null}
+
+              {isVirtualMode ? (
+                <label className="select-group">
+                  <span>배경 느낌</span>
+                  <select
+                    value={backgroundStyle}
+                    onChange={(event) => setBackgroundStyle(event.target.value)}
+                    disabled={Boolean(backgroundImage)}
+                  >
+                    <option value="배경 없이">배경 없이</option>
+                    <option value="밝은 스튜디오">밝은 스튜디오</option>
+                    <option value="따뜻한 실내">따뜻한 실내</option>
+                    <option value="자연광 느낌">자연광 느낌</option>
+                    <option value="쇼핑몰 촬영 느낌">쇼핑몰 촬영 느낌</option>
                   </select>
                 </label>
               ) : null}
@@ -220,10 +256,10 @@ export function WorkspaceView({
         <div className="field-card">
           <div className="field-head">
             <div>
-              <p className="field-label">추가 프롬프트</p>
+              <p className="field-label">추가 요청</p>
               <p className="field-hint">
                 {isVirtualMode
-                  ? "분위기나 연출을 짧게 적어주세요"
+                  ? "원하는 사람 느낌이나 배경 분위기를 짧게 적어주세요"
                   : "소매 접기나 넣어 입기처럼 작은 착용 방식만 짧게 적어주세요"}
               </p>
             </div>
@@ -233,7 +269,7 @@ export function WorkspaceView({
             className="prompt-textarea"
             placeholder={
               isVirtualMode
-                ? "예: 동양인 여자 30대, 배경은 없이, 자연스러운 쇼핑몰 촬영 느낌"
+                ? "예: 30대 여성 느낌, 밝고 자연스러운 분위기"
                 : "예: 셔츠를 넣어 입기, 소매를 살짝 걷기"
             }
             value={promptText}
@@ -282,13 +318,22 @@ export function WorkspaceView({
                 formData.append("backgroundImage", backgroundImage);
               }
               formData.append("generationMode", generationMode);
+              formData.append("aspectRatio", aspectRatio);
 
+              const promptParts = [
+                isVirtualMode && !backgroundImage && backgroundStyle !== "배경 없이"
+                  ? backgroundStyle
+                  : null,
+                promptText.trim(),
+              ].filter(Boolean);
               const summaryPrompt = [
                 `카테고리: ${category}`,
-                isVirtualMode ? `모델 설정: ${modelPreset}` : null,
+                isVirtualMode ? `모델 성별: ${modelPreset}` : null,
+                isVirtualMode ? `사진 비율: ${aspectRatio}` : null,
+                isVirtualMode ? `배경 느낌: ${backgroundImage ? "참고 사진 우선" : backgroundStyle}` : null,
                 `촬영 방향: ${cameraAngle}`,
                 isVirtualMode && backgroundImage ? "배경 참고: 사용" : null,
-                promptText.trim(),
+                promptParts.join(" / "),
               ]
                 .filter(Boolean)
                 .join(" / ");

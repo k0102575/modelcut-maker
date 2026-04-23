@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ALLOWED_IMAGE_MIME_TYPES,
+  type AspectRatio,
   getGenerationCreditCost,
   MAX_IMAGE_FILE_SIZE_BYTES,
   type GenerationMode,
@@ -41,6 +42,9 @@ export function ModelCreateView({
   onJobSettled,
 }: Props) {
   const [imageReference, setImageReference] = useState<File | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("3:4");
+  const [modelProfile, setModelProfile] = useState("여성 30대");
+  const [shotFrame, setShotFrame] = useState("전신이 보이게");
   const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -99,7 +103,7 @@ export function ModelCreateView({
             <div className="field-head">
               <div>
                 <p className="field-label">출력 설정</p>
-                <p className="field-hint">생성 품질만 간단하게 고를 수 있습니다</p>
+                <p className="field-hint">원하는 사람 느낌과 사진 모양을 쉽게 고를 수 있습니다</p>
               </div>
             </div>
 
@@ -113,6 +117,38 @@ export function ModelCreateView({
                   <option value="fast">빠르게 (1 크레딧)</option>
                   <option value="balanced">균형 (2 크레딧)</option>
                   <option value="quality">고품질 (3 크레딧)</option>
+                </select>
+              </label>
+
+              <label className="select-group">
+                <span>사진 비율</span>
+                <select
+                  value={aspectRatio}
+                  onChange={(event) => setAspectRatio(event.target.value as AspectRatio)}
+                >
+                  <option value="1:1">정사각형 (1:1)</option>
+                  <option value="3:4">세로형 (기본, 3:4)</option>
+                  <option value="4:5">세로형 길게 (4:5)</option>
+                </select>
+              </label>
+
+              <label className="select-group">
+                <span>사람 느낌</span>
+                <select value={modelProfile} onChange={(event) => setModelProfile(event.target.value)}>
+                  <option value="여성 20대">여성 20대</option>
+                  <option value="여성 30대">여성 30대</option>
+                  <option value="남성 20대">남성 20대</option>
+                  <option value="남성 30대">남성 30대</option>
+                  <option value="자동 선택">자동 선택</option>
+                </select>
+              </label>
+
+              <label className="select-group">
+                <span>보이는 범위</span>
+                <select value={shotFrame} onChange={(event) => setShotFrame(event.target.value)}>
+                  <option value="전신이 보이게">전신이 보이게</option>
+                  <option value="허벅지까지 보이게">허벅지까지 보이게</option>
+                  <option value="상반신만 보이게">상반신만 보이게</option>
                 </select>
               </label>
             </div>
@@ -157,12 +193,27 @@ export function ModelCreateView({
               setLoading(true);
               setErrorMessage("");
 
+              const summaryPrompt = [
+                `사람 느낌: ${modelProfile}`,
+                `보이는 범위: ${shotFrame}`,
+                `사진 비율: ${aspectRatio}`,
+                imageReference ? "참고 사진: 사용" : null,
+                promptText.trim(),
+              ]
+                .filter(Boolean)
+                .join(" / ");
+              const apiPrompt = [shotFrame, modelProfile, promptText.trim()]
+                .filter(Boolean)
+                .join(", ");
+
               const formData = new FormData();
               if (imageReference) {
                 formData.append("imageReference", imageReference);
               }
               formData.append("generationMode", generationMode);
-              formData.append("promptText", promptText.trim());
+              formData.append("aspectRatio", aspectRatio);
+              formData.append("promptText", summaryPrompt);
+              formData.append("apiPromptText", apiPrompt);
 
               const response = await createModelJob(formData);
               onCreditsReserved(response.job.id, getGenerationCreditCost("model", generationMode));

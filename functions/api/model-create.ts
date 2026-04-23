@@ -1,4 +1,10 @@
-import { FASHN_GENERATION_MODES, type GenerationMode, type JobResponse } from "../../shared/contracts";
+import {
+  FASHN_ASPECT_RATIOS,
+  FASHN_GENERATION_MODES,
+  type AspectRatio,
+  type GenerationMode,
+  type JobResponse,
+} from "../../shared/contracts";
 import { requireAuth } from "../_shared/auth";
 import { createModelPrediction, fileToDataUrl, validateImageFile } from "../_shared/fashn";
 import { insertJob, type Env } from "../_shared/jobs";
@@ -26,21 +32,27 @@ export const onRequestPost = async (context: {
     const formData = await request.formData();
     const imageReferenceFile = validateImageFile(formData.get("imageReference"), "참고 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
+    const apiPromptText = String(formData.get("apiPromptText") ?? promptText).trim();
     const generationModeValue = String(formData.get("generationMode") ?? "balanced");
+    const aspectRatioValue = String(formData.get("aspectRatio") ?? "3:4");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
       generationModeValue as GenerationMode,
     )
       ? (generationModeValue as GenerationMode)
       : "balanced";
+    const aspectRatio: AspectRatio = FASHN_ASPECT_RATIOS.includes(aspectRatioValue as AspectRatio)
+      ? (aspectRatioValue as AspectRatio)
+      : "3:4";
 
     if (!promptText) {
       return errorResponse("모델 설명을 입력해 주세요", 400);
     }
 
     const predictionId = await createModelPrediction(env.FASHN_API_KEY, {
-      prompt: promptText,
+      prompt: apiPromptText,
       imageReference: imageReferenceFile ? await fileToDataUrl(imageReferenceFile) : undefined,
       generationMode,
+      aspectRatio,
     });
 
     const job = await insertJob(env, {

@@ -5,6 +5,7 @@ import {
   type CreditsSummary,
   type GenerationMode,
   type JobMode,
+  type AspectRatio,
 } from "../../shared/contracts";
 
 const FASHN_BASE_URL = "https://api.fashn.ai/v1";
@@ -112,6 +113,7 @@ export async function createPrediction(
     backgroundImage?: string;
     prompt: string;
     generationMode: GenerationMode;
+    aspectRatio?: AspectRatio;
   },
 ): Promise<string> {
   const isPersonMode = input.mode === "person";
@@ -125,7 +127,7 @@ export async function createPrediction(
         : {}),
       ...(input.prompt ? { prompt: input.prompt } : {}),
       resolution: "1k",
-      aspect_ratio: "3:4",
+      aspect_ratio: isPersonMode ? "3:4" : (input.aspectRatio ?? "3:4"),
       generation_mode:
         isPersonMode && input.generationMode === "fast" ? "balanced" : input.generationMode,
       output_format: "png",
@@ -156,6 +158,7 @@ export async function createModelPrediction(
     prompt: string;
     imageReference?: string;
     generationMode: GenerationMode;
+    aspectRatio?: AspectRatio;
   },
 ): Promise<string> {
   const payload = {
@@ -164,7 +167,7 @@ export async function createModelPrediction(
       prompt: input.prompt,
       ...(input.imageReference ? { image_reference: input.imageReference } : {}),
       resolution: "1k",
-      aspect_ratio: "3:4",
+      aspect_ratio: input.aspectRatio ?? "3:4",
       generation_mode: input.generationMode,
       output_format: "png",
       return_base64: false,
