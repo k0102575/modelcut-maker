@@ -191,6 +191,82 @@ export async function createModelPrediction(
   return data.id;
 }
 
+export async function createModelSwapPrediction(
+  apiKey: string,
+  input: {
+    modelImage: string;
+    prompt?: string;
+    faceReference?: string;
+    generationMode: GenerationMode;
+  },
+): Promise<string> {
+  const payload = {
+    model_name: "model-swap",
+    inputs: {
+      model_image: input.modelImage,
+      ...(input.prompt ? { prompt: input.prompt } : {}),
+      ...(input.faceReference ? { face_reference: input.faceReference } : {}),
+      resolution: "1k",
+      generation_mode: input.generationMode,
+      output_format: "png",
+      return_base64: false,
+    },
+  };
+
+  const response = await fetch(`${FASHN_BASE_URL}/run`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json()) as FashnCreateResponse;
+  if (!response.ok || !data.id) {
+    throw new Error(readApiErrorMessage(data) ?? "모델 변경 요청에 실패했습니다. 다시 시도해 주세요");
+  }
+
+  return data.id;
+}
+
+export async function createEditPrediction(
+  apiKey: string,
+  input: {
+    image: string;
+    prompt: string;
+    imageContext?: string;
+  },
+): Promise<string> {
+  const payload = {
+    model_name: "edit",
+    inputs: {
+      image: input.image,
+      prompt: input.prompt,
+      ...(input.imageContext ? { image_context: input.imageContext } : {}),
+      resolution: "1k",
+      output_format: "png",
+      return_base64: false,
+    },
+  };
+
+  const response = await fetch(`${FASHN_BASE_URL}/run`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json()) as FashnCreateResponse;
+  if (!response.ok || !data.id) {
+    throw new Error(readApiErrorMessage(data) ?? "이미지 수정 요청에 실패했습니다. 다시 시도해 주세요");
+  }
+
+  return data.id;
+}
+
 export async function getPredictionStatus(
   apiKey: string,
   predictionId: string,

@@ -17,7 +17,7 @@ export type JobStatus =
   | "failed"
   | "expired";
 
-export type JobMode = "person" | "virtual" | "model";
+export type JobMode = "person" | "virtual" | "model" | "swap" | "edit";
 export type GenerationMode = (typeof FASHN_GENERATION_MODES)[number];
 export type TryOnMaxGenerationMode = (typeof TRYON_MAX_GENERATION_MODES)[number];
 export type AspectRatio = (typeof FASHN_ASPECT_RATIOS)[number];
@@ -35,6 +35,10 @@ export function getProductToModelCreditCost(mode: GenerationMode): number {
 }
 
 export function getGenerationCreditCost(jobMode: JobMode, mode: GenerationMode): number {
+  if (jobMode === "edit") {
+    return 1;
+  }
+
   if (jobMode === "person") {
     return mode === "quality" ? 3 : 2;
   }
