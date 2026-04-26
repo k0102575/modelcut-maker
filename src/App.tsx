@@ -11,11 +11,13 @@ import {
 } from "react-router-dom";
 import type { SessionUser } from "../shared/contracts";
 import { fetchCredits, fetchSession, login, logout } from "./lib/api";
+import { EditView } from "./components/EditView";
 import { HelpView } from "./components/HelpView";
 import { HistoryView } from "./components/HistoryView";
 import { JobDetailView } from "./components/JobDetailView";
 import { LoginView } from "./components/LoginView";
 import { ModelCreateView } from "./components/ModelCreateView";
+import { ModelSwapView } from "./components/ModelSwapView";
 import { WorkspaceView } from "./components/WorkspaceView";
 
 function AppLayout({
@@ -86,6 +88,18 @@ function AppLayout({
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
             >
               모델 이미지 먼저 만들기
+            </NavLink>
+            <NavLink
+              to="/swap"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              모델만 바꾸기
+            </NavLink>
+            <NavLink
+              to="/edit"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              이미지 조금 수정하기
             </NavLink>
             <NavLink
               to="/history"
@@ -370,6 +384,28 @@ export default function App() {
           path="/model"
           element={
             <ModelCreateView
+              onOpenHistory={() => navigate("/history")}
+              onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+              onCreditsReserved={reserveCredits}
+              onJobSettled={settleReservedCredits}
+            />
+          }
+        />
+        <Route
+          path="/swap"
+          element={
+            <ModelSwapView
+              onOpenHistory={() => navigate("/history")}
+              onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
+              onCreditsReserved={reserveCredits}
+              onJobSettled={settleReservedCredits}
+            />
+          }
+        />
+        <Route
+          path="/edit"
+          element={
+            <EditView
               onOpenHistory={() => navigate("/history")}
               onOpenJob={(jobId) => navigate(`/jobs/${jobId}`)}
               onCreditsReserved={reserveCredits}

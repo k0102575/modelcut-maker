@@ -1,4 +1,4 @@
-import type { JobStatus } from "../../shared/contracts";
+import type { JobMode, JobStatus } from "../../shared/contracts";
 
 const formatter = new Intl.DateTimeFormat("ko-KR", {
   month: "numeric",
@@ -28,9 +28,17 @@ export function formatStatusLabel(status: JobStatus): string {
   }
 }
 
-export function formatModeLabel(mode: "person" | "virtual" | "model"): string {
+export function formatModeLabel(mode: JobMode): string {
   if (mode === "person") {
     return "사람 사진에 옷 입히기";
+  }
+
+  if (mode === "swap") {
+    return "모델만 바꾸기";
+  }
+
+  if (mode === "edit") {
+    return "이미지 조금 수정하기";
   }
 
   if (mode === "model") {
@@ -59,6 +67,8 @@ export function parsePromptSummary(promptText: string): {
     "사람 느낌:",
     "보이는 범위:",
     "참고 사진:",
+    "참고 얼굴 사진:",
+    "참고 이미지:",
   ];
   const items = promptText
     .split(" / ")
