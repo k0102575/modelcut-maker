@@ -160,40 +160,6 @@ export function HelpView() {
         </HelpSection>
 
         <HelpSection
-          id="help-swap"
-          eyebrow="기능 설명"
-          title="모델만 바꾸기"
-          summary="원본 이미지의 옷과 구도는 최대한 유지하면서 사람만 다른 느낌으로 바꾸는 기능입니다. 기존 결과물에서 얼굴과 전체 인상만 바꾸고 싶을 때 사용하면 좋습니다."
-        >
-          <div className="help-topic">
-            <h4>이럴 때 사용하세요</h4>
-            <ul className="help-list">
-              <li>옷과 포즈는 그대로 두고 사람만 다른 느낌으로 바꾸고 싶을 때</li>
-              <li>같은 결과물을 여성 느낌, 남성 느낌처럼 다른 버전으로 보고 싶을 때</li>
-            </ul>
-          </div>
-
-          <div className="help-topic">
-            <h4>필요한 사진과 옵션</h4>
-            <ul className="help-list">
-              <li>`원본 이미지`는 꼭 필요합니다.</li>
-              <li>`참고 얼굴 사진`이 있으면 원하는 사람 쪽으로 더 가깝게 맞추는 데 도움이 됩니다.</li>
-              <li>`생성 품질`은 빠르게 1, 균형 2, 고품질 3 크레딧이 사용됩니다.</li>
-              <li>참고 얼굴 사진을 함께 넣으면 1장당 3크레딧이 추가됩니다.</li>
-            </ul>
-          </div>
-
-          <div className="help-topic">
-            <h4>설명은 이렇게 적어 주세요</h4>
-            <ul className="help-list">
-              <li>성별, 나이대, 분위기 정도만 짧게 적는 편이 좋습니다.</li>
-              <li>예: `30대 여성 느낌`, `깔끔한 남성 모델 느낌`</li>
-              <li>참고 얼굴 사진이 있으면 설명을 비워도 되지만, 짧게 함께 적으면 더 안정적일 수 있습니다.</li>
-            </ul>
-          </div>
-        </HelpSection>
-
-        <HelpSection
           id="help-edit"
           eyebrow="기능 설명"
           title="이미지 조금 수정하기"
@@ -239,7 +205,6 @@ export function HelpView() {
               <li>옷으로 바로 모델컷 만들기: 빠르게 1, 균형 2, 고품질 3</li>
               <li>사람 사진에 옷 입히기: 균형 2, 고품질 3</li>
               <li>모델 이미지 먼저 만들기: 빠르게 1, 균형 2, 고품질 3</li>
-              <li>모델만 바꾸기: 빠르게 1, 균형 2, 고품질 3</li>
               <li>이미지 조금 수정하기: 1</li>
             </ul>
           </div>
