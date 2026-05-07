@@ -37,6 +37,33 @@ function validateClientFile(file: File | null, required = false): string | null 
   return null;
 }
 
+const categoryPromptMap: Record<string, string> = {
+  상의: "focus on the upper garment styling",
+  하의: "focus on the lower garment styling",
+  원피스: "style it as a one-piece dress",
+  여성세트: "style it as a coordinated women's two-piece outfit with both top and bottom clearly shown",
+};
+
+const cameraAnglePromptMap: Record<string, string> = {
+  정면: "show a clear front view",
+  측면: "show a clear side view",
+  뒷면: "show a clear back view",
+};
+
+const modelPresetPromptMap: Record<string, string> = {
+  "자동 선택": "",
+  남성: "male fashion model",
+  여성: "female fashion model",
+};
+
+const backgroundStylePromptMap: Record<string, string> = {
+  "배경 없이": "",
+  "밝은 스튜디오": "bright studio background",
+  "따뜻한 실내": "warm indoor setting",
+  "자연광 느낌": "soft natural daylight setting",
+  "쇼핑몰 촬영 느낌": "clean ecommerce studio setting",
+};
+
 export function WorkspaceView({
   workspaceMode,
   onOpenHistory,
@@ -174,6 +201,7 @@ export function WorkspaceView({
                   <option value="상의">상의</option>
                   <option value="하의">하의</option>
                   <option value="원피스">원피스</option>
+                  <option value="여성세트">여성세트</option>
                 </select>
               </label>
 
@@ -321,9 +349,10 @@ export function WorkspaceView({
               formData.append("aspectRatio", aspectRatio);
 
               const promptParts = [
-                isVirtualMode && !backgroundImage && backgroundStyle !== "배경 없이"
-                  ? backgroundStyle
-                  : null,
+                isVirtualMode ? categoryPromptMap[category] : null,
+                isVirtualMode ? modelPresetPromptMap[modelPreset] : null,
+                isVirtualMode ? cameraAnglePromptMap[cameraAngle] : null,
+                isVirtualMode && !backgroundImage ? backgroundStylePromptMap[backgroundStyle] : null,
                 promptText.trim(),
               ].filter(Boolean);
               const summaryPrompt = [
@@ -338,8 +367,26 @@ export function WorkspaceView({
                 .filter(Boolean)
                 .join(" / ");
 
+              const personPrompt = [
+                categoryPromptMap[category],
+                cameraAnglePromptMap[cameraAngle],
+                promptText.trim(),
+              ]
+                .filter(Boolean)
+                .join(", ");
+
+              const virtualPrompt = [
+                categoryPromptMap[category],
+                modelPresetPromptMap[modelPreset],
+                cameraAnglePromptMap[cameraAngle],
+                !backgroundImage ? backgroundStylePromptMap[backgroundStyle] : null,
+                promptText.trim(),
+              ]
+                .filter(Boolean)
+                .join(", ");
+
               formData.append("promptText", summaryPrompt);
-              formData.append("apiPromptText", isVirtualMode ? summaryPrompt : promptText.trim());
+              formData.append("apiPromptText", isVirtualMode ? virtualPrompt : personPrompt);
 
               const response = await createJob(formData);
               onCreditsReserved(response.job.id, getGenerationCreditCost(workspaceMode, generationMode));
