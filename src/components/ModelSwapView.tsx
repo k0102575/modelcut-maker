@@ -42,7 +42,7 @@ export function ModelSwapView({
 }: Props) {
   const [modelImage, setModelImage] = useState<File | null>(null);
   const [faceReference, setFaceReference] = useState<File | null>(null);
-  const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
+  const [generationMode, setGenerationMode] = useState<GenerationMode>("fast");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -135,7 +135,7 @@ export function ModelSwapView({
             <div>
               <p className="field-label">바꾸고 싶은 사람 설명</p>
               <p className="field-hint">
-                성별, 나이대, 분위기를 짧게 적어주세요. 참고 얼굴 사진이 있으면 비워도 됩니다.
+                나이대와 분위기를 짧게 적어주세요. 참고 얼굴 사진이 있으면 비워도 됩니다.
               </p>
             </div>
             <span className="pill">선택</span>

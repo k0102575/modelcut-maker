@@ -12,6 +12,9 @@ import { formatDateTime, formatModeLabel } from "../lib/format";
 import { FileDropField } from "./FileDropField";
 import { StatusBadge } from "./StatusBadge";
 
+const FIXED_MODEL_GENDER = "여성";
+const FIXED_ASPECT_RATIO: AspectRatio = "3:4";
+
 type Props = {
   onOpenHistory: () => void;
   onOpenJob: (jobId: string) => void;
@@ -42,10 +45,9 @@ export function ModelCreateView({
   onJobSettled,
 }: Props) {
   const [imageReference, setImageReference] = useState<File | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("3:4");
-  const [modelProfile, setModelProfile] = useState("여성 30대");
+  const [modelAge, setModelAge] = useState("30대");
   const [shotFrame, setShotFrame] = useState("전신이 보이게");
-  const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
+  const [generationMode, setGenerationMode] = useState<GenerationMode>("fast");
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -103,7 +105,7 @@ export function ModelCreateView({
             <div className="field-head">
               <div>
                 <p className="field-label">출력 설정</p>
-                <p className="field-hint">원하는 사람 느낌과 사진 모양을 쉽게 고를 수 있습니다</p>
+                <p className="field-hint">원하는 나이대와 보이는 범위를 쉽게 고를 수 있습니다</p>
               </div>
             </div>
 
@@ -121,24 +123,10 @@ export function ModelCreateView({
               </label>
 
               <label className="select-group">
-                <span>사진 비율</span>
-                <select
-                  value={aspectRatio}
-                  onChange={(event) => setAspectRatio(event.target.value as AspectRatio)}
-                >
-                  <option value="1:1">정사각형 (1:1)</option>
-                  <option value="3:4">세로형 (기본, 3:4)</option>
-                  <option value="4:5">세로형 길게 (4:5)</option>
-                </select>
-              </label>
-
-              <label className="select-group">
-                <span>사람 느낌</span>
-                <select value={modelProfile} onChange={(event) => setModelProfile(event.target.value)}>
-                  <option value="여성 20대">여성 20대</option>
-                  <option value="여성 30대">여성 30대</option>
-                  <option value="남성 20대">남성 20대</option>
-                  <option value="남성 30대">남성 30대</option>
+                <span>나이대</span>
+                <select value={modelAge} onChange={(event) => setModelAge(event.target.value)}>
+                  <option value="20대">20대</option>
+                  <option value="30대">30대</option>
                   <option value="자동 선택">자동 선택</option>
                 </select>
               </label>
@@ -193,10 +181,11 @@ export function ModelCreateView({
               setLoading(true);
               setErrorMessage("");
 
+              const modelProfile =
+                modelAge === "자동 선택" ? FIXED_MODEL_GENDER : `${FIXED_MODEL_GENDER} ${modelAge}`;
               const summaryPrompt = [
-                `사람 느낌: ${modelProfile}`,
+                `나이대: ${modelAge}`,
                 `보이는 범위: ${shotFrame}`,
-                `사진 비율: ${aspectRatio}`,
                 imageReference ? "참고 사진: 사용" : null,
                 promptText.trim(),
               ]
@@ -211,7 +200,7 @@ export function ModelCreateView({
                 formData.append("imageReference", imageReference);
               }
               formData.append("generationMode", generationMode);
-              formData.append("aspectRatio", aspectRatio);
+              formData.append("aspectRatio", FIXED_ASPECT_RATIO);
               formData.append("promptText", summaryPrompt);
               formData.append("apiPromptText", apiPrompt);
 

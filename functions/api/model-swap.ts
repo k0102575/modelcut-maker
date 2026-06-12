@@ -35,12 +35,12 @@ export const onRequestPost = async (context: {
     const modelImageFile = validateImageFile(formData.get("modelImage"), "원본 이미지", true);
     const faceReferenceFile = validateImageFile(formData.get("faceReference"), "참고 얼굴 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
-    const generationModeValue = String(formData.get("generationMode") ?? "balanced");
+    const generationModeValue = String(formData.get("generationMode") ?? "fast");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
       generationModeValue as GenerationMode,
     )
       ? (generationModeValue as GenerationMode)
-      : "balanced";
+      : "fast";
 
     const predictionId = await createModelSwapPrediction(env.FASHN_API_KEY, {
       modelImage: await fileToDataUrl(modelImageFile as File),

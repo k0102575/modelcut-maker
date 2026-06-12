@@ -39,18 +39,19 @@ export const onRequestPost = async (context: {
     const backgroundImageFile = validateImageFile(formData.get("backgroundImage"), "배경 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
     const apiPromptText = String(formData.get("apiPromptText") ?? promptText).trim();
-    const generationModeValue = String(formData.get("generationMode") ?? "balanced");
+    const mode = modelImageFile ? "person" : "virtual";
+    const defaultGenerationMode: GenerationMode = mode === "virtual" ? "fast" : "balanced";
+    const generationModeValue = String(formData.get("generationMode") ?? defaultGenerationMode);
     const aspectRatioValue = String(formData.get("aspectRatio") ?? "3:4");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
       generationModeValue as GenerationMode,
     )
       ? (generationModeValue as GenerationMode)
-      : "balanced";
+      : defaultGenerationMode;
     const aspectRatio: AspectRatio = FASHN_ASPECT_RATIOS.includes(aspectRatioValue as AspectRatio)
       ? (aspectRatioValue as AspectRatio)
       : "3:4";
 
-    const mode = modelImageFile ? "person" : "virtual";
     const predictionId = await createPrediction(env.FASHN_API_KEY, {
       mode,
       productImage: await fileToDataUrl(productImageFile as File),

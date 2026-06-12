@@ -50,11 +50,8 @@ const cameraAnglePromptMap: Record<string, string> = {
   뒷면: "show a clear back view",
 };
 
-const modelPresetPromptMap: Record<string, string> = {
-  "자동 선택": "",
-  남성: "male fashion model",
-  여성: "female fashion model",
-};
+const FIXED_MODEL_PRESET_PROMPT = "female fashion model";
+const FIXED_ASPECT_RATIO: AspectRatio = "3:4";
 
 const backgroundStylePromptMap: Record<string, string> = {
   "배경 없이": "",
@@ -75,11 +72,11 @@ export function WorkspaceView({
   const [modelImage, setModelImage] = useState<File | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
   const [category, setCategory] = useState("상의");
-  const [modelPreset, setModelPreset] = useState("여성");
   const [cameraAngle, setCameraAngle] = useState("정면");
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("3:4");
   const [backgroundStyle, setBackgroundStyle] = useState("배경 없이");
-  const [generationMode, setGenerationMode] = useState<GenerationMode>("balanced");
+  const [generationMode, setGenerationMode] = useState<GenerationMode>(
+    workspaceMode === "virtual" ? "fast" : "balanced",
+  );
   const [promptText, setPromptText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -103,11 +100,9 @@ export function WorkspaceView({
     setModelImage(null);
     setBackgroundImage(null);
     setCategory("상의");
-    setModelPreset("여성");
     setCameraAngle("정면");
-    setAspectRatio("3:4");
     setBackgroundStyle("배경 없이");
-    setGenerationMode("balanced");
+    setGenerationMode(workspaceMode === "virtual" ? "fast" : "balanced");
     setPromptText("");
     setLoading(false);
     setErrorMessage("");
@@ -204,31 +199,6 @@ export function WorkspaceView({
                   <option value="여성세트">여성세트</option>
                 </select>
               </label>
-
-              {isVirtualMode ? (
-                <label className="select-group">
-                  <span>모델 성별</span>
-                  <select value={modelPreset} onChange={(event) => setModelPreset(event.target.value)}>
-                    <option value="자동 선택">자동 선택</option>
-                    <option value="남성">남성</option>
-                    <option value="여성">여성</option>
-                  </select>
-                </label>
-              ) : null}
-
-              {isVirtualMode ? (
-                <label className="select-group">
-                  <span>사진 비율</span>
-                  <select
-                    value={aspectRatio}
-                    onChange={(event) => setAspectRatio(event.target.value as AspectRatio)}
-                  >
-                    <option value="1:1">정사각형 (1:1)</option>
-                    <option value="3:4">세로형 (기본, 3:4)</option>
-                    <option value="4:5">세로형 길게 (4:5)</option>
-                  </select>
-                </label>
-              ) : null}
 
               {isVirtualMode ? (
                 <label className="select-group">
@@ -346,23 +316,14 @@ export function WorkspaceView({
                 formData.append("backgroundImage", backgroundImage);
               }
               formData.append("generationMode", generationMode);
-              formData.append("aspectRatio", aspectRatio);
+              formData.append("aspectRatio", FIXED_ASPECT_RATIO);
 
-              const promptParts = [
-                isVirtualMode ? categoryPromptMap[category] : null,
-                isVirtualMode ? modelPresetPromptMap[modelPreset] : null,
-                isVirtualMode ? cameraAnglePromptMap[cameraAngle] : null,
-                isVirtualMode && !backgroundImage ? backgroundStylePromptMap[backgroundStyle] : null,
-                promptText.trim(),
-              ].filter(Boolean);
               const summaryPrompt = [
                 `카테고리: ${category}`,
-                isVirtualMode ? `모델 성별: ${modelPreset}` : null,
-                isVirtualMode ? `사진 비율: ${aspectRatio}` : null,
                 isVirtualMode ? `배경 느낌: ${backgroundImage ? "참고 사진 우선" : backgroundStyle}` : null,
                 `촬영 방향: ${cameraAngle}`,
                 isVirtualMode && backgroundImage ? "배경 참고: 사용" : null,
-                promptParts.join(" / "),
+                promptText.trim(),
               ]
                 .filter(Boolean)
                 .join(" / ");
@@ -377,7 +338,7 @@ export function WorkspaceView({
 
               const virtualPrompt = [
                 categoryPromptMap[category],
-                modelPresetPromptMap[modelPreset],
+                FIXED_MODEL_PRESET_PROMPT,
                 cameraAnglePromptMap[cameraAngle],
                 !backgroundImage ? backgroundStylePromptMap[backgroundStyle] : null,
                 promptText.trim(),

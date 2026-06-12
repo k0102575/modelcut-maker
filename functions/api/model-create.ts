@@ -33,13 +33,13 @@ export const onRequestPost = async (context: {
     const imageReferenceFile = validateImageFile(formData.get("imageReference"), "참고 사진");
     const promptText = String(formData.get("promptText") ?? "").trim();
     const apiPromptText = String(formData.get("apiPromptText") ?? promptText).trim();
-    const generationModeValue = String(formData.get("generationMode") ?? "balanced");
+    const generationModeValue = String(formData.get("generationMode") ?? "fast");
     const aspectRatioValue = String(formData.get("aspectRatio") ?? "3:4");
     const generationMode: GenerationMode = FASHN_GENERATION_MODES.includes(
       generationModeValue as GenerationMode,
     )
       ? (generationModeValue as GenerationMode)
-      : "balanced";
+      : "fast";
     const aspectRatio: AspectRatio = FASHN_ASPECT_RATIOS.includes(aspectRatioValue as AspectRatio)
       ? (aspectRatioValue as AspectRatio)
       : "3:4";
